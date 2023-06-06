@@ -7,6 +7,7 @@ from scipy.sparse.linalg import norm
 from scipy.ndimage import gaussian_filter
 import cooler
 import logging
+import os
 
 
 # -------------------RWR-----------------------------------------------------
@@ -211,16 +212,15 @@ def impute(coolfile, chrom, resolution):
     )
 
 def coarsen(inputfile, outputfile, chrom, factor):
-    c = cooler.Cooler(inputfile)
-    m = c.matrix(balance=False, as_pixels=True).fetch(chrom)
-
+    # c = cooler.Cooler(inputfile)
+    # m = c.matrix(balance=False, as_pixels=True).fetch(chrom)
     base_uri = inputfile
     output_uri = outputfile
     chunksize = 10000
     cooler.coarsen_cooler(base_uri, output_uri, factor, chunksize)
 
 
-def normalize(m, num_bins, chrom):
+"""def temp_normalize():
     def valid_bin_per_gap(num_bins, valid_bins, gap):
         cnt = 0
         for b in range(num_bins-gap):
@@ -228,34 +228,97 @@ def normalize(m, num_bins, chrom):
                 cnt = cnt + 1
         return cnt
 
-    filtered_regions = pd.read_csv('./ext/hg19_filter_regions.txt', sep = "\t", header = None)
-    filtered_regions = filtered_regions[filtered_regions.iloc[:,0]==chrom]
-    filtered_regions['bin_num'] = (filtered_regions.iloc[:,1]/100000).astype(int)
-    filtered_bins = np.unique(filtered_regions['bin_num'])
+    def upper_trim(x, trim, n_counts):
+        #print(type(x))
+        
+        x = np.sort(x)
+        trim_length = int(np.ceil(len(x) * (1 - trim)))
+        trimmed_x = x[:trim_length]
+        if len(trimmed_x) == 0:
+            return 0,0
+        trimmed_mean = np.sum(trimmed_x)/n_counts
+        trimmed_std = np.sum(np.power(trimmed_x-trimmed_mean, 2))/n_counts
+        return np.mean(trimmed_x), np.std(trimmed_x)
 
-    # c = cooler.Cooler('/project/compbio-lab/scHi-C/100kb_imputed_cool/181218_21yr_2_A12_AD004_OPC_100kb_contacts/181218_21yr_2_A12_AD004_OPC_100kb_contacts_imputed.cool')
-    # num_bins = int(c.chromsizes[chrom]/c.binsize)
-    valid_bins = [b for b in range(num_bins) if not b in filtered_bins]
-    # m = c.matrix(balance=False, as_pixels=True).fetch(impute_chromosome)
+    #filtered_regions = pd.read_csv('../ext/hg19_filter_regions.txt', sep = "\t", header = None)
+    #filtered_regions = filtered_regions[filtered_regions.iloc[:,0]=='chr22']
+    #filtered_regions['bin_num'] = (filtered_regions.iloc[:,1]/100000).astype(int)
+    #filtered_bins = np.unique(filtered_regions['bin_num'])
+    raw_cool = cooler.Cooler('/project/compbio-lab/scHi-C/100kb_imputed_cool/181218_21yr_2_A12_AD004_OPC_100kb_contacts/181218_21yr_2_A12_AD004_OPC_100kb_contacts_coarse.cool')
+    raw_pixel = raw_cool.matrix(balance = False, as_pixels = True).fetch('chr22')
+    raw_pixel = raw_pixel[raw_pixel['bin1_id']!=raw_pixel['bin2_id']]
+    chr22_offset = raw_cool.offset('chr22')
+    valid_bins = np.union1d(raw_pixel['bin1_id'],raw_pixel['bin2_id']) - chr22_offset
+    c = cooler.Cooler('/project/compbio-lab/scHi-C/100kb_imputed_cool/181218_21yr_2_A12_AD004_OPC_100kb_contacts/181218_21yr_2_A12_AD004_OPC_100kb_contacts_imputed.cool')
+    num_bins = int(c.chromsizes['chr22']/c.binsize)
+    #valid_bins = [b for b in range(num_bins) if not b in filtered_bins]
+    m = c.matrix(balance=False, as_pixels=True).fetch('chr22')
+    m = m[(m['bin1_id'].isin(valid_bins)) & (m['bin2_id'].isin(valid_bins))]
+    m['gap'] = m['bin2_id'] - m['bin1_id']  
+    gap_means, gap_stds = [], []
+    for gap in range(num_bins):
+        gap_counts = m[m['gap']==gap]['count']
+        n_counts = valid_bin_per_gap(num_bins, valid_bins, gap)
+        mean,std = upper_trim(gap_counts, 0.01, n_counts)
+        gap_means.append(mean)
+        gap_stds.append(std)
+    gap_means, gap_stds = np.array(gap_means), np.array(gap_stds)
+    m['gap_mean'] = gap_means[m['gap']]
+    m['gap_std'] = gap_stds[m['gap']]
+    m['z_score'] = ((m['count'] - m['gap_mean'])/m['gap_std'])*(m['gap_std']>0.000001)
+"""
+def normalize(coarsefile, imputed_pixel, num_bins, chrom):
+    def valid_bin_per_gap(num_bins, valid_bins, gap):
+        cnt = 0
+        for b in range(num_bins-gap):
+            if (b in valid_bins) & ((b+gap) in valid_bins):
+                cnt = cnt + 1
+        return cnt
+
+    # x: the array being trimmed
+    # trim: the trim percentage
+    def upper_trim(x, trim, n_counts):
+        x = np.sort(x)
+        trim_length = int(np.ceil(len(x) * (1 - trim)))
+        trimmed_x = x[:trim_length]
+        if len(trimmed_x) == 0:
+            return 0,0
+        trimmed_mean = np.sum(trimmed_x)/n_counts
+        trimmed_std = np.sqrt(np.sum(np.power(trimmed_x-trimmed_mean, 2))/n_counts)
+        return trimmed_mean, trimmed_std
+
+    # filtered_regions = pd.read_csv('./ext/hg19_filter_regions.txt', sep = "\t", header = None)
+    # filtered_regions = filtered_regions[filtered_regions.iloc[:,0]==chrom]
+    # filtered_regions['bin_num'] = (filtered_regions.iloc[:,1]/100000).astype(int)
+    # filtered_bins = np.unique(filtered_regions['bin_num'])
+
+    raw_cool = cooler.Cooler(coarsefile)
+    raw_pixel = raw_cool.matrix(balance = False, as_pixels = True).fetch('chr22')
+    raw_pixel = raw_pixel[raw_pixel['bin1_id'] != raw_pixel['bin2_id']]
+    offset = raw_cool.offset(chrom)
+    valid_bins = np.union1d(raw_pixel['bin1_id'],raw_pixel['bin2_id']) - offset
+
+    m = imputed_pixel
     m = m[(m['bin1_id'].isin(valid_bins)) & (m['bin2_id'].isin(valid_bins))]
     m['gap'] = m['bin2_id'] - m['bin1_id']
-    sum_per_dist = m.groupby('gap').aggregate({'count':'sum'}).reset_index()
-    sum_per_dist['n_count'] = [valid_bin_per_gap(num_bins, valid_bins, g) for g in sum_per_dist['gap']]
-    sum_per_dist['mean'] = sum_per_dist['count']/sum_per_dist['n_count']
-    gap_means = np.zeros(num_bins)
-    gap_means[sum_per_dist['gap']] = sum_per_dist['mean']
+    
+    gap_means, gap_stds = [], []
+    for gap in range(num_bins):
+        gap_counts = m[m['gap']==gap]['count']
+        n_counts = valid_bin_per_gap(num_bins, valid_bins, gap)
+        mean,std = upper_trim(gap_counts, 0.01, n_counts)
+        gap_means.append(mean)
+        gap_stds.append(std)
+    
+    gap_means, gap_stds = np.array(gap_means), np.array(gap_stds)
+
     m['gap_mean'] = gap_means[m['gap']]
-
-    m['dev'] = np.power((m['count'] - m['gap_mean']),2)
-    dev_per_dist = m.groupby('gap').aggregate({'dev':'sum'}).reset_index()
-    dev_per_dist['n_count'] = [valid_bin_per_gap(num_bins, valid_bins, g) for g in dev_per_dist['gap']]
-    dev_per_dist['mean'] = dev_per_dist['dev']/dev_per_dist['n_count']
-    gap_devs = np.zeros(num_bins)
-    gap_devs[dev_per_dist['gap']] = dev_per_dist['mean']
-    m['gap_dev'] = gap_devs[m['gap']]
-    m['z_score'] = (m['count'] - m['gap_mean'])/m['gap_dev']
-
+    m['gap_std'] = gap_stds[m['gap']]
+    m['count'] = ((m['count'] - m['gap_mean'])/m['gap_std'])*(m['gap_std']>0.000001)
+    
+    #print(m)
     return m
+    
 
 def main():
     chrom = 'chr22'
@@ -266,15 +329,17 @@ def main():
 
     inputdir = "/project/compbio-lab/scHi-C/Lee2019/Human_single_cell_10kb_cool/"
     coarsedir = "/project/compbio-lab/scHi-C/Lee2019/Human_single_cell_100kb_cool/"
-    outdir = "/project/compbio-lab/scHi-C/Lee2019/100kb_imputed_cool/"
+    outdir = "/project/compbio-lab/scHi-C/Lee2019/100kb_imputed_cool/Astro_100kb_imputed_cool/"
 
-    file_list = "/home/maa160/SnapHiC-D/unprocessed_file_list.txt"
+    file_list = "/home/maa160/SnapHiC-D/file_lists/Astro_file_list.txt"
     
+    file_no = 1
     with open(file_list, "r") as file:
     # Iterate through each line in the file
         for line in file:
+            print(file_no, line.strip())
             run(filename = line.strip(), chrom=chrom, resolution=resolution, factor= factor, inputdir=inputdir, coarsedir=coarsedir, outdir=outdir)
-            time.sleep(2)
+            file_no += 1
 
         
 
@@ -282,24 +347,27 @@ def run(filename, chrom, resolution, factor, inputdir, coarsedir, outdir):
     
     inputfile = inputdir + filename
     coarsefile = coarsedir + filename.replace("_10kb_", "_100kb_")
-    outputfile = outdir = filename.replace("_10kb_", "_100kb_")[:4] + "_imputed.cool"
+    outputfile = outdir + filename.replace("_10kb_", "_100kb_").replace(".cool","_imputed.cool")
     
-    coarsen(inputfile, coarsefile, chrom, factor)
-    imputed_pixels, num_bins= impute(coarsefile, chrom, resolution)
-    normalized_pixels = normalize(imputed_pixels, num_bins, chrom)
+    if coarsefile not in os.listdir(coarsedir):
+        coarsen(inputfile, coarsefile, chrom, factor)
 
-    bins = pd.DataFrame({
-        'chrom': [chrom] * num_bins,
-        'start': np.arange(0, num_bins * resolution, resolution),
-        'end': np.arange(resolution, num_bins * resolution + resolution, resolution)
-    })
+    if outputfile not in os.listdir(outdir):
+        imputed_pixels, num_bins= impute(coarsefile, chrom, resolution)
+        normalized_pixels = normalize(coarsefile, imputed_pixels, num_bins, chrom)
 
-    cooler.create_cooler(outputfile, 
-                        bins=bins, 
-                        pixels=normalized_pixels,
-                        ordered=True,
-                        columns = ['z_score'],
-                        dtypes={'z_score': np.float64}) # TODO: should this be float32? and is the column 'z_score'?
+        bins = pd.DataFrame({
+            'chrom': [chrom] * num_bins,
+            'start': np.arange(0, num_bins * resolution, resolution),
+            'end': np.arange(resolution, num_bins * resolution + resolution, resolution)
+        })
+
+        cooler.create_cooler(outputfile, 
+                            bins=bins, 
+                            pixels=normalized_pixels,
+                            ordered=True,
+                            # columns = ['z_score'],
+                            dtypes={'count': np.float64}) # TODO: should this be float32? and is the column 'z_score'?
 
 
 if __name__ == "__main__":
