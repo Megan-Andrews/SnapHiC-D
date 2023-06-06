@@ -1,5 +1,8 @@
 import os
 
+"""
+python version of the print file names for SnapHiC-D 
+"""
 def create_file_list(dir_a, dir_b, out_dir):
     file_list = [('name','group')]
 
@@ -22,7 +25,6 @@ def create_file_list(dir_a, dir_b, out_dir):
 
     print("File list created successfully.")
 
-# Example usage
 directory_a = '/project/compbio-lab/scHi-C/SnapHiC-D_example_data/sox2_ESC/'
 directory_b = '/project/compbio-lab/scHi-C/SnapHiC-D_example_data/sox2_NPC/'
 output_dir = '/project/compbio-lab/scHi-C/SnapHiC-D_example_data/sox2_outdir/'
