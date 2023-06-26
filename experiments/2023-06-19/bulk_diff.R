@@ -21,6 +21,7 @@ diffhic_obj = make_diffhic_object('txt', c(typeA_files,typeB_files), 'chr21',
 keep <- aveLogCPM(asDGEList(diffhic_obj)) > 0
 diffhic_obj <- diffhic_obj[keep,]
 y <- asDGEList(diffhic_obj)
+
 # normalization
 y <- normOffsets(y, se.out=TRUE)
 
@@ -29,10 +30,14 @@ ab <- aveLogCPM(asDGEList(diffhic_obj))
 o <- order(ab)
 adj.counts <- cpm(asDGEList(diffhic_obj), log=TRUE)
 mval <- adj.counts[,3]-adj.counts[,2]
+
 smoothScatter(ab, mval, xlab="A", ylab="M", 
               main="K562 (1) vs. GM12878 (2) \n before normalization")
 fit <- loessFit(x=ab, y=mval)
 lines(ab[o], fit$fitted[o], col="red")
+
+savePlot(filename = "before_normalization.png", type = "png", width = 8, height = 6)
+
 
 ab <- aveLogCPM(y)
 o <- order(ab)
@@ -42,6 +47,9 @@ smoothScatter(ab, mval, xlab="A", ylab="M",
               main="K562 (1) vs. GM12878 (2) \n after normalization")
 fit <- loessFit(x=ab, y=mval)
 lines(ab[o], fit$fitted[o], col="red")
+print("saving")
+savePlot(filename = "after_normalization.png", type = "png", width = 8, height = 6)
+
 dev.off()
 # modeling and testing 
 group = factor(c(1,1,2,2))

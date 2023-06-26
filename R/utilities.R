@@ -45,7 +45,7 @@ cool2matrix <- function(file, chr = 'chr1') {
       pixels$count[bin.range[i]]
   }
   chrom.ranges <- (chrom.range[1]+1):(chrom.range[2]+1)
-  mat <- as.data.frame(mat)
+  # mat <- as.data.frame(mat)
   return(mat)
 }
 
