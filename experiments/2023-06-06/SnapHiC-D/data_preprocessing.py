@@ -348,7 +348,7 @@ def run(filename, chrom, resolution, factor, inputdir, coarsedir, outdir):
     inputfile = inputdir + filename
     coarsefile = coarsedir + filename.replace("_10kb_", "_100kb_")
     outputfile = outdir + filename.replace("_10kb_", "_100kb_").replace(".cool","_imputed.cool")
-    
+   
     if coarsefile not in os.listdir(coarsedir):
         coarsen(inputfile, coarsefile, chrom, factor)
 
