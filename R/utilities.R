@@ -103,6 +103,8 @@ make_diffhic_object <- function(input_format, files, chr_name,
                                 chr_size_file, resolution){
   g = read.table(chr_size_file)
   chr_size = as.numeric(g[g[,1]==chr_name,2])
+
+  print("obtain matrices")
   if (input_format == 'txt'){
     dfs = lapply(files, read.table)
     mats = lapply(dfs, df2mat, chr_size = chr_size, resolution = resolution)
@@ -115,13 +117,40 @@ make_diffhic_object <- function(input_format, files, chr_name,
     return 
   }
   chr_size = ceiling(chr_size/resolution)
+
+  print("get ranges")
   regions = GRanges(rep(chr_name,chr_size), IRanges(c(0:(chr_size-1)),c(1:chr_size)))
+  
+  print("get CMs")
   cms = lapply(mats, ContactMatrix, anchor1 = c(1:chr_size),
                      anchor2 = c(1:chr_size), regions = regions)
   to.keep = Reduce("|", lapply(cms, function(cm){as.matrix(cm)!=0}))
-  isets = lapply(cms, deflate, extract = to.keep)
-  data = Reduce(cbind, isets)
+  
+  print("get InteractionSets")
+  data = NULL
+  for ( i in (1:floor(length(cms)/100))){
+    start = 1 + (i-1) * 100
+    if (start + 99 > length(cms)){
+      end = length(cms)
+    }else{
+      end = start + 99
+    }
+    print(paste(start, end))
+    isets = lapply(cms[start:end], deflate, extract = to.keep)
+
+    print("reducing")
+    if(is.null(data)){
+      data = Reduce(cbind, isets)
+    }else{
+      data = cbind(data, Reduce(cbind, isets))
+    }
+  }
+  
+
+  print("get interactions")
   interactions(data) <- as(interactions(data), "ReverseStrictGInteractions")
+
+  print("assay names")
   assayNames(data) = 'counts'
   return(data)
 }

@@ -329,9 +329,9 @@ def main():
 
     inputdir = "/project/compbio-lab/scHi-C/Lee2019/Human_single_cell_10kb_cool/"
     coarsedir = "/project/compbio-lab/scHi-C/Lee2019/Human_single_cell_100kb_cool/"
-    outdir = "/project/compbio-lab/scHi-C/Lee2019/100kb_imputed_cool/Astro_100kb_imputed_cool/"
+    outdir = "/project/compbio-lab/scHi-C/Lee2019/100kb_imputed_cool/ODC_100kb_imputed_cool/"
 
-    file_list = "/home/maa160/SnapHiC-D/file_lists/Astro_file_list.txt"
+    file_list = "/home/maa160/SnapHiC-D/experiments/2023-06-06/SnapHiC-D/file_lists/ODC_file_listA.txt"
     
     file_no = 1
     with open(file_list, "r") as file:
@@ -349,10 +349,10 @@ def run(filename, chrom, resolution, factor, inputdir, coarsedir, outdir):
     coarsefile = coarsedir + filename.replace("_10kb_", "_100kb_")
     outputfile = outdir + filename.replace("_10kb_", "_100kb_").replace(".cool","_imputed.cool")
    
-    if coarsefile not in os.listdir(coarsedir):
+    if True: #coarsefile not in os.listdir(coarsedir):
         coarsen(inputfile, coarsefile, chrom, factor)
 
-    if outputfile not in os.listdir(outdir):
+    if True: #outputfile not in os.listdir(outdir):
         imputed_pixels, num_bins= impute(coarsefile, chrom, resolution)
         normalized_pixels = normalize(coarsefile, imputed_pixels, num_bins, chrom)
 

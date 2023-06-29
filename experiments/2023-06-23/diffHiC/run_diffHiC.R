@@ -54,7 +54,7 @@ dev.off()
 print("modeling and testing" )
 group = factor(c(rep(1, 449), rep(2, 422)))
 design = model.matrix(~group)
-y <- estimateDisp(y, design)
+y <- estimateDisp(y, design) # From edgeR 
 fit <- glmQLFit(y, design, robust=TRUE)
 result <- glmQLFTest(fit)
 adj.p <- p.adjust(result$table$PValue, method="BH")
