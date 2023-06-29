@@ -351,6 +351,8 @@ def run(filename, chrom, resolution, factor, inputdir, coarsedir, outdir):
    
     if coarsefile not in os.listdir(coarsedir):
         coarsen(inputfile, coarsefile, chrom, factor)
+    else:
+        print("already coarsened")
 
     if outputfile not in os.listdir(outdir):
         imputed_pixels, num_bins= impute(coarsefile, chrom, resolution)
@@ -368,7 +370,8 @@ def run(filename, chrom, resolution, factor, inputdir, coarsedir, outdir):
                             ordered=True,
                             # columns = ['z_score'],
                             dtypes={'count': np.float64}) # TODO: should this be float32? and is the column 'z_score'?
-
+    else:
+        print("already imputed")
 
 if __name__ == "__main__":
     main() 
