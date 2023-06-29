@@ -349,10 +349,10 @@ def run(filename, chrom, resolution, factor, inputdir, coarsedir, outdir):
     coarsefile = coarsedir + filename.replace("_10kb_", "_100kb_")
     outputfile = outdir + filename.replace("_10kb_", "_100kb_").replace(".cool","_imputed.cool")
    
-    if True: #coarsefile not in os.listdir(coarsedir):
+    if coarsefile not in os.listdir(coarsedir):
         coarsen(inputfile, coarsefile, chrom, factor)
 
-    if True: #outputfile not in os.listdir(outdir):
+    if outputfile not in os.listdir(outdir):
         imputed_pixels, num_bins= impute(coarsefile, chrom, resolution)
         normalized_pixels = normalize(coarsefile, imputed_pixels, num_bins, chrom)
 
