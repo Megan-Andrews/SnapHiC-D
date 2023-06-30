@@ -29,7 +29,7 @@ y <- normOffsets(y, se.out=TRUE)
 
 print("visualization")
 par(mfrow=c(1,2))
-png(filename = "loess_smoothing.png", width = 800, height = 600)
+png(filename = "/project/compbio-lab/scHi-C/Lee2019/2023-06-29/diffHiC/loess_smoothing.png", width = 800, height = 600)
 ab <- aveLogCPM(asDGEList(diffhic_obj))
 o <- order(ab)
 
@@ -64,7 +64,7 @@ inter.frame <- as.data.frame(interactions(diffhic_obj))[,useful.cols]
 results.r <- data.frame(inter.frame, result$table, FDR=adj.p)
 o.r <- order(results.r$PValue)
 results.r = results.r[o.r,]
-write.csv(results.r, file = "diffHiC_results.csv", row.names = FALSE)
+write.csv(results.r, file = "/project/compbio-lab/scHi-C/Lee2019/2023-06-29/diffHiC/diffHiC_results.csv", row.names = FALSE)
 
 
 
