@@ -3,11 +3,11 @@ library(InteractionSet)
 
 ### this function is from https://github.com/TaoYang-dev/hicrep/blob/master/R/cool2matrix.R
 cool2matrix <- function(file, chr = 'chr1') {
-  
+
   pixels <- h5read(file, c('pixels'));H5close()
   bins <- h5read(file, c('bins'));H5close()
   chrom.offset <- h5read(file, 'indexes/chrom_offset');H5close()
-  
+
   chr2index <- function(chr) {
     if (substr(chr, 1, 3) == 'chr') {
       chr = substr(chr, 4, nchar(chr))
@@ -26,7 +26,7 @@ cool2matrix <- function(file, chr = 'chr1') {
     }
     return(index)
   }
-  
+
   chrom.index <- chr2index(chr)
   chrom.range <- chrom.offset[chrom.index:(chrom.index+1)] + c(0, -1) 
   n.rows <- chrom.range[2] - chrom.range[1] + 1 
@@ -72,7 +72,7 @@ cool2sparse <- function(file, chr = 'chr1', resolution) {
     }
     return(index)
   }
-  
+
   chrom.index <- chr2index(chr)
   chrom.range <- chrom.offset[chrom.index:(chrom.index+1)] + c(0, -1) 
   df = data.frame(bin1_id = pixels$bin1_id,
@@ -103,8 +103,6 @@ make_diffhic_object <- function(input_format, files, chr_name,
                                 chr_size_file, resolution){
   g = read.table(chr_size_file)
   chr_size = as.numeric(g[g[,1]==chr_name,2])
-
-  print("obtain matrices")
   if (input_format == 'txt'){
     dfs = lapply(files, read.table)
     mats = lapply(dfs, df2mat, chr_size = chr_size, resolution = resolution)
@@ -117,40 +115,13 @@ make_diffhic_object <- function(input_format, files, chr_name,
     return 
   }
   chr_size = ceiling(chr_size/resolution)
-
-  print("get ranges")
   regions = GRanges(rep(chr_name,chr_size), IRanges(c(0:(chr_size-1)),c(1:chr_size)))
-  
-  print("get CMs")
   cms = lapply(mats, ContactMatrix, anchor1 = c(1:chr_size),
                      anchor2 = c(1:chr_size), regions = regions)
   to.keep = Reduce("|", lapply(cms, function(cm){as.matrix(cm)!=0}))
-  
-  print("get InteractionSets")
-  data = NULL
-  for ( i in (1:floor(length(cms)/100))){
-    start = 1 + (i-1) * 100
-    if (start + 99 > length(cms)){
-      end = length(cms)
-    }else{
-      end = start + 99
-    }
-    print(paste(start, end))
-    isets = lapply(cms[start:end], deflate, extract = to.keep)
-
-    print("reducing")
-    if(is.null(data)){
-      data = Reduce(cbind, isets)
-    }else{
-      data = cbind(data, Reduce(cbind, isets))
-    }
-  }
-  
-
-  print("get interactions")
+  isets = lapply(cms, deflate, extract = to.keep)
+  data = Reduce(cbind, isets)
   interactions(data) <- as(interactions(data), "ReverseStrictGInteractions")
-
-  print("assay names")
   assayNames(data) = 'counts'
   return(data)
 }
@@ -176,6 +147,3 @@ make_multiHiCcompare_object <- function(input_format, files, chr_name,
   hicexp = make_hicexp(data_list=dfs, groups = groups, A.min = 5, zero.p = 1)
   return(hicexp)
 }
-
-
-
