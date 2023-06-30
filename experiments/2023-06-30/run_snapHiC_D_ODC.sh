@@ -17,10 +17,10 @@
 ###                            User Variables                            ###
 ############################################################################
 
-SnapHiC_D_dir="/home/maa160/SnapHiC-D/experiments/2023-06-06/SnapHiC-D"
+SnapHiC_D_dir="/home/maa160/SnapHiC-D/experiments/2023-06-30/SnapHiC-D"
 group_A_dir="/project/compbio-lab/scHi-C/Lee2019/100kb_imputed_cool/ODC_1_100kb_imputed_cool"
 group_B_dir="/project/compbio-lab/scHi-C/Lee2019/100kb_imputed_cool/ODC_2_100kb_imputed_cool"
-out_dir="/project/compbio-lab/scHi-C/Lee2019/2023-06-29/ODC_diff_batched"
+out_dir="/project/compbio-lab/scHi-C/Lee2019/results/2023-06-29/ODC_diff_batched"
 chr="chr22"
 genome="hg19"
 num_CPUs=8
