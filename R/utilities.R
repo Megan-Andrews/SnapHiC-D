@@ -1,4 +1,5 @@
 library('rhdf5')
+library(pryr)
 library(InteractionSet)
 
 ### this function is from https://github.com/TaoYang-dev/hicrep/blob/master/R/cool2matrix.R
