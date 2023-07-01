@@ -46,6 +46,7 @@ cool2matrix <- function(file, chr = 'chr1') {
   }
   chrom.ranges <- (chrom.range[1]+1):(chrom.range[2]+1)
   # mat <- as.data.frame(mat)
+  
   return(mat)
 }
 
@@ -114,10 +115,12 @@ make_diffhic_object <- function(input_format, files, chr_name,
     print('txt or cool formats are available.')
     return 
   }
+  object_size(mats)
   chr_size = ceiling(chr_size/resolution)
   regions = GRanges(rep(chr_name,chr_size), IRanges(c(0:(chr_size-1)),c(1:chr_size)))
   cms = lapply(mats, ContactMatrix, anchor1 = c(1:chr_size),
                      anchor2 = c(1:chr_size), regions = regions)
+  object_size(cms)
   to.keep = Reduce("|", lapply(cms, function(cm){as.matrix(cm)!=0}))
   isets = lapply(cms, deflate, extract = to.keep)
   data = Reduce(cbind, isets)
