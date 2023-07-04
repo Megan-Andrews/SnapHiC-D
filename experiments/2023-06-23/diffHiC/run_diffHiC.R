@@ -41,8 +41,8 @@ print(object_size(y))
 
 gc()
 print("visualization")
-par(mfrow=c(1,2))
-png(filename = "/home/maa160/SnapHiC-D/experiments/2023-06-23/diffHiC/loess_smoothing.png", width = 800, height = 600)
+# par(mfrow=c(1,2))
+png(filename = "/home/maa160/SnapHiC-D/experiments/2023-06-23/diffHiC/before_loess_smoothing.png", width = 800, height = 600)
 
 gc()
 print("aveLogCPM")
@@ -67,6 +67,9 @@ gc()
 print("loessFit")
 fit <- loessFit(x=ab, y=mval)
 lines(ab[o], fit$fitted[o], col="red")
+
+dev.off()
+png(filename = "/home/maa160/SnapHiC-D/experiments/2023-06-23/diffHiC/after_loess_smoothing.png", width = 800, height = 600)
 
 gc()
 print("aveLogCPM")
@@ -104,13 +107,18 @@ rm(group)
 y <- estimateDisp(y, design) # From edgeR 
 print(object_size(y))
 
+gc()
 print("glmQLFit")
 fit <- glmQLFit(y, design, robust=TRUE)
 rm(design)
-result <- glmQLFTest(fit)
 rm(y)
+gc()
+
+print("glmQLFTest")
+result <- glmQLFTest(fit)
 print(object_size(result))
 
+gc()
 print("adj.p")
 adj.p <- p.adjust(result$table$PValue, method="BH")
 sum(adj.p <= 0.05)
