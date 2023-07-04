@@ -27,7 +27,7 @@ chrom_sizes = '/home/maa160/SnapHiC-D/ext/hg19.chrom.sizes'
 # loading data (intrinsic filtering)
 hicexp = make_multiHiCcompare_object('txt', c(typeA_files,typeB_files), 'chr22',
                                      chrom_sizes, 100000,
-                                     c('A','A','B','B'))
+                                     c(rep('A', 449), rep('B', 422)))
 # normalization 
 MD_hicexp(hicexp,plot.loess = TRUE)
 norm_hicexp = cyclic_loess(hicexp, verbose = FALSE, 
