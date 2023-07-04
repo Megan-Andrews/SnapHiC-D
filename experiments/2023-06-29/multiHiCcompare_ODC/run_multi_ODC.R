@@ -24,21 +24,22 @@ chrom_sizes = '/home/maa160/SnapHiC-D/ext/hg19.chrom.sizes'
 
 ### multiHiCcompare 
 
-# loading data (intrinsic filtering)
-hicexp = make_multiHiCcompare_object('txt', c(typeA_files,typeB_files), 'chr22',
+print("loading data (intrinsic filtering)")
+hicexp = make_multiHiCcompare_object('cool', c(typeA_files,typeB_files), 'chr22',
                                      chrom_sizes, 100000,
                                      c(rep('A', 449), rep('B', 422)))
-# normalization 
+print("normalization") 
 MD_hicexp(hicexp,plot.loess = TRUE)
 norm_hicexp = cyclic_loess(hicexp, verbose = FALSE, 
                            parallel = FALSE, span = 0.2)
 MD_hicexp(norm_hicexp,plot.loess = TRUE)
-# modeling and testing 
+
+print("modeling and testing") 
 norm_hicexp = hic_exactTest(norm_hicexp, p.method = 'fdr')
 norm_hicexp = hic_glm(norm_hicexp,design,coef=ncol(design))
 
 
-# analysis 
+print("analysis") 
 diffhic.res = results.r[,c('start1', 'start2', 'logFC', 'PValue', 'FDR')]
 multi.res = results(norm_hicexp)[,c('region1', 'region2', 'logFC', 'p.value', 'p.adj')]
 colnames(diffhic.res) = c('region1', 'region2', 'logFC', 'p.value', 'p.adj')
