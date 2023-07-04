@@ -28,15 +28,14 @@ gc()
 print("filtering uninteresting bin pairs") 
 keep <- aveLogCPM(asDGEList(diffhic_obj)) > 0
 diffhic_obj <- diffhic_obj[keep,]
-z <- asDGEList(diffhic_obj)
+y <- asDGEList(diffhic_obj)
 i <- interactions(diffhic_obj)
-print(object_size(z))
-rm(diffhic_obj)
+print(object_size(y))
 rm(keep)
 
 gc()
 print("normalization")
-y <- normOffsets(z, se.out=TRUE)
+y <- normOffsets(asDGEList(diffhic_obj), se.out=TRUE)
 print(object_size(y))
 
 gc()
@@ -46,15 +45,17 @@ png(filename = "/home/maa160/SnapHiC-D/experiments/2023-06-23/diffHiC/before_loe
 
 gc()
 print("aveLogCPM")
-print(object_size(z))
-ab <- aveLogCPM(z)
+print(object_size(y))
+ab <- aveLogCPM(asDGEList(diffhic_obj))
 print(object_size(ab))
 o <- order(ab)
 
 gc()
 print("adjusted counts")
-adj.counts <- cpm(z, log=TRUE)
-rm(z)
+adj.counts <- cpm(asDGEList(diffhic_obj) , log=TRUE)
+rm(diffhic_obj)
+gc()
+
 print(object_size(adj.counts ))
 mval <- adj.counts[,3]-adj.counts[,2]
 
@@ -80,7 +81,7 @@ o <- order(ab)
 gc()
 print("adj.counts")
 adj.counts <- cpm(y, log=TRUE)
-print(object_size(adj.counts ))
+print(object_size(adj.counts )) # 404.16 MB
 mval <- adj.counts[,3]-adj.counts[,2]
 
 gc()
@@ -105,7 +106,7 @@ design = model.matrix(~group)
 rm(group)
 
 y <- estimateDisp(y, design) # From edgeR 
-print(object_size(y))
+print(object_size(y)) # 809.80 MB
 
 gc()
 print("glmQLFit")
