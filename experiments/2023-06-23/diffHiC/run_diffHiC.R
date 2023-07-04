@@ -15,7 +15,7 @@ mg_file_list_path <- "/home/maa160/SnapHiC-D/experiments/2023-06-23/diffHiC/file
 astro_file_list <- readLines(astro_file_list_path)
 mg_file_list <- readLines(mg_file_list_path)
 
-mg_file_list = paste0(input_directory, astro_file_list)
+typeA_files = paste0(input_directory, astro_file_list)
 typeB_files = paste0(input_directory, mg_file_list)
 
 print("loading data")
