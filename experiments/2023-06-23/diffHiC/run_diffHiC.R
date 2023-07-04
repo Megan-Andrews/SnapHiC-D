@@ -1,3 +1,5 @@
+rm(list = ls())
+gc()
 library(diffHic)
 library(rhdf5)
 library(edgeR)
@@ -13,20 +15,29 @@ mg_file_list_path <- "/home/maa160/SnapHiC-D/experiments/2023-06-23/diffHiC/file
 astro_file_list <- readLines(astro_file_list_path)
 mg_file_list <- readLines(mg_file_list_path)
 
-typeA_files = paste0(input_directory, astro_file_list)
+mg_file_list = paste0(input_directory, astro_file_list)
 typeB_files = paste0(input_directory, mg_file_list)
 
 print("loading data")
 diffhic_obj = make_diffhic_object('cool', c(typeA_files,typeB_files), 'chr22','/home/maa160/SnapHiC-D/ext/hg19.chrom.sizes', 100000)
+rm(input_directory)
+rm(astro_file_list_path)
+rm(mg_file_list_path)
+rm(astro_file_list)
+rm(mg_file_list)
+rm(mg_file_list,typeB_files)
 
 print("filtering uninteresting bin pairs") 
 keep <- aveLogCPM(asDGEList(diffhic_obj)) > 0
 diffhic_obj <- diffhic_obj[keep,]
-y <- asDGEList(diffhic_obj)
-print(object_size(y))
+z <- asDGEList(diffhic_obj)
+i <- interactions(diffhic_obj)
+print(object_size(z))
+rm(diffhic_obj)
+rm(keep)
 
 print("normalization")
-y <- normOffsets(y, se.out=TRUE)
+y <- normOffsets(z, se.out=TRUE)
 print(object_size(y))
 
 print("visualization")
@@ -34,13 +45,13 @@ par(mfrow=c(1,2))
 png(filename = "/project/compbio-lab/scHi-C/Lee2019/2023-06-29/diffHiC/loess_smoothing.png", width = 800, height = 600)
 
 print("aveLogCPM")
-print(object_size(diffhic_obj))
-ab <- aveLogCPM(asDGEList(diffhic_obj))
+print(object_size(z))
+ab <- aveLogCPM(z)
 print(object_size(ab))
 o <- order(ab)
 
 print("adjusted counts")
-adj.counts <- cpm(asDGEList(diffhic_obj), log=TRUE)
+adj.counts <- cpm(z, log=TRUE)
 print(object_size(adj.counts ))
 mval <- adj.counts[,3]-adj.counts[,2]
 
@@ -70,15 +81,25 @@ fit <- loessFit(x=ab, y=mval)
 lines(ab[o], fit$fitted[o], col="red")
 dev.off()
 
+rm(fit)
+rm(ab)
+rm(o)
+rm(mval)
+rm(adj.counts)
+
 print("modeling and testing" )
 group = factor(c(rep(1, 449), rep(2, 422)))
 design = model.matrix(~group)
+rm(group)
+
 y <- estimateDisp(y, design) # From edgeR 
 print(object_size(y))
 
 print("glmQLFit")
 fit <- glmQLFit(y, design, robust=TRUE)
+rm(design)
 result <- glmQLFTest(fit)
+rm(y)
 print(object_size(result))
 
 print("adj.p")
@@ -89,7 +110,7 @@ print(object_size(adj.p))
 print("useful.cols")
 useful.cols <- as.vector(outer(c("seqnames", "start", "end"), 1:2, paste0))
 print(object_size(adj.p))
-inter.frame <- as.data.frame(interactions(diffhic_obj))[,useful.cols]
+inter.frame <- as.data.frame(i)[,useful.cols]
 print(object_size(inter.frame))
 results.r <- data.frame(inter.frame, result$table, FDR=adj.p)
 print(object_size(results.r ))
