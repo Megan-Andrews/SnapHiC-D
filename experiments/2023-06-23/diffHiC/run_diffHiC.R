@@ -20,13 +20,11 @@ typeB_files = paste0(input_directory, mg_file_list)
 
 print("loading data")
 diffhic_obj = make_diffhic_object('cool', c(typeA_files,typeB_files), 'chr22','/home/maa160/SnapHiC-D/ext/hg19.chrom.sizes', 100000)
-rm(input_directory)
-rm(astro_file_list_path)
-rm(mg_file_list_path)
-rm(astro_file_list)
-rm(mg_file_list)
-rm(mg_file_list,typeB_files)
+rm(cool2matrix, cool2sparse, df2mat, make_diffhic_object, make_multiHiCcompare_object)
+rm(input_directory, astro_file_list_path, mg_file_list_path, astro_file_list)
+rm(mg_file_list,typeB_files, typeA_files)
 
+gc()
 print("filtering uninteresting bin pairs") 
 keep <- aveLogCPM(asDGEList(diffhic_obj)) > 0
 diffhic_obj <- diffhic_obj[keep,]
@@ -36,44 +34,53 @@ print(object_size(z))
 rm(diffhic_obj)
 rm(keep)
 
+gc()
 print("normalization")
 y <- normOffsets(z, se.out=TRUE)
 print(object_size(y))
 
+gc()
 print("visualization")
 par(mfrow=c(1,2))
 png(filename = "/home/maa160/SnapHiC-D/experiments/2023-06-23/diffHiC/loess_smoothing.png", width = 800, height = 600)
 
+gc()
 print("aveLogCPM")
 print(object_size(z))
 ab <- aveLogCPM(z)
 print(object_size(ab))
 o <- order(ab)
 
+gc()
 print("adjusted counts")
 adj.counts <- cpm(z, log=TRUE)
 rm(z)
 print(object_size(adj.counts ))
 mval <- adj.counts[,3]-adj.counts[,2]
 
+gc()
 print("smoothScatter")
 smoothScatter(ab, mval, xlab="A", ylab="M", 
               main="Astro (1) vs. MG (2) \n before normalization")
 
+gc()
 print("loessFit")
 fit <- loessFit(x=ab, y=mval)
 lines(ab[o], fit$fitted[o], col="red")
 
+gc()
 print("aveLogCPM")
 ab <- aveLogCPM(y)
 print(object_size(ab))
 o <- order(ab)
 
+gc()
 print("adj.counts")
 adj.counts <- cpm(y, log=TRUE)
 print(object_size(adj.counts ))
 mval <- adj.counts[,3]-adj.counts[,2]
 
+gc()
 print("smoothScatter")
 smoothScatter(ab, mval, xlab="A", ylab="M", 
               main="Astro (1) vs. MG (2) \n after normalization")
@@ -88,6 +95,7 @@ rm(o)
 rm(mval)
 rm(adj.counts)
 
+gc()
 print("modeling and testing" )
 group = factor(c(rep(1, 449), rep(2, 422)))
 design = model.matrix(~group)
