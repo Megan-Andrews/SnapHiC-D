@@ -42,7 +42,7 @@ print(object_size(y))
 
 print("visualization")
 par(mfrow=c(1,2))
-png(filename = "/project/compbio-lab/scHi-C/Lee2019/2023-06-29/diffHiC/loess_smoothing.png", width = 800, height = 600)
+png(filename = "/home/maa160/SnapHiC-D/experiments/2023-06-23/diffHiC/loess_smoothing.png", width = 800, height = 600)
 
 print("aveLogCPM")
 print(object_size(z))
@@ -52,6 +52,7 @@ o <- order(ab)
 
 print("adjusted counts")
 adj.counts <- cpm(z, log=TRUE)
+rm(z)
 print(object_size(adj.counts ))
 mval <- adj.counts[,3]-adj.counts[,2]
 
@@ -118,7 +119,7 @@ o.r <- order(results.r$PValue)
 results.r = results.r[o.r,]
 print(object_size(results.r ))
 
-write.csv(results.r, file = "/project/compbio-lab/scHi-C/Lee2019/2023-06-29/diffHiC/diffHiC_results.csv", row.names = FALSE)
+write.csv(results.r, file = "/home/maa160/SnapHiC-D/experiments/2023-06-23/diffHiC/diffHiC_MG_Astro_results.csv", row.names = FALSE)
 
 
 
