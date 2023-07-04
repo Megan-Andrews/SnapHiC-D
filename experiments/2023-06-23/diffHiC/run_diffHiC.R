@@ -34,11 +34,14 @@ par(mfrow=c(1,2))
 png(filename = "/project/compbio-lab/scHi-C/Lee2019/2023-06-29/diffHiC/loess_smoothing.png", width = 800, height = 600)
 
 print("aveLogCPM")
+print(object_size(diffhic_obj))
 ab <- aveLogCPM(asDGEList(diffhic_obj))
+print(object_size(ab))
 o <- order(ab)
 
 print("adjusted counts")
 adj.counts <- cpm(asDGEList(diffhic_obj), log=TRUE)
+print(object_size(adj.counts ))
 mval <- adj.counts[,3]-adj.counts[,2]
 
 print("smoothScatter")
@@ -51,11 +54,18 @@ lines(ab[o], fit$fitted[o], col="red")
 
 print("aveLogCPM")
 ab <- aveLogCPM(y)
+print(object_size(ab))
 o <- order(ab)
+
+print("adj.counts")
 adj.counts <- cpm(y, log=TRUE)
+print(object_size(adj.counts ))
 mval <- adj.counts[,3]-adj.counts[,2]
+
+print("smoothScatter")
 smoothScatter(ab, mval, xlab="A", ylab="M", 
               main="Astro (1) vs. MG (2) \n after normalization")
+
 fit <- loessFit(x=ab, y=mval)
 lines(ab[o], fit$fitted[o], col="red")
 dev.off()
@@ -64,15 +74,29 @@ print("modeling and testing" )
 group = factor(c(rep(1, 449), rep(2, 422)))
 design = model.matrix(~group)
 y <- estimateDisp(y, design) # From edgeR 
+print(object_size(y))
+
+print("glmQLFit")
 fit <- glmQLFit(y, design, robust=TRUE)
 result <- glmQLFTest(fit)
+print(object_size(result))
+
+print("adj.p")
 adj.p <- p.adjust(result$table$PValue, method="BH")
 sum(adj.p <= 0.05)
+print(object_size(adj.p))
+
+print("useful.cols")
 useful.cols <- as.vector(outer(c("seqnames", "start", "end"), 1:2, paste0))
+print(object_size(adj.p))
 inter.frame <- as.data.frame(interactions(diffhic_obj))[,useful.cols]
+print(object_size(inter.frame))
 results.r <- data.frame(inter.frame, result$table, FDR=adj.p)
+print(object_size(results.r ))
 o.r <- order(results.r$PValue)
 results.r = results.r[o.r,]
+print(object_size(results.r ))
+
 write.csv(results.r, file = "/project/compbio-lab/scHi-C/Lee2019/2023-06-29/diffHiC/diffHiC_results.csv", row.names = FALSE)
 
 
