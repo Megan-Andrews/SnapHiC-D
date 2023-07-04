@@ -23,24 +23,33 @@ print("filtering uninteresting bin pairs")
 keep <- aveLogCPM(asDGEList(diffhic_obj)) > 0
 diffhic_obj <- diffhic_obj[keep,]
 y <- asDGEList(diffhic_obj)
+print(object_size(y))
 
 print("normalization")
 y <- normOffsets(y, se.out=TRUE)
+print(object_size(y))
 
 print("visualization")
 par(mfrow=c(1,2))
 png(filename = "/project/compbio-lab/scHi-C/Lee2019/2023-06-29/diffHiC/loess_smoothing.png", width = 800, height = 600)
+
+print("aveLogCPM")
 ab <- aveLogCPM(asDGEList(diffhic_obj))
 o <- order(ab)
 
+print("adjusted counts")
 adj.counts <- cpm(asDGEList(diffhic_obj), log=TRUE)
 mval <- adj.counts[,3]-adj.counts[,2]
+
+print("smoothScatter")
 smoothScatter(ab, mval, xlab="A", ylab="M", 
               main="Astro (1) vs. MG (2) \n before normalization")
+
+print("loessFit")
 fit <- loessFit(x=ab, y=mval)
 lines(ab[o], fit$fitted[o], col="red")
 
-
+print("aveLogCPM")
 ab <- aveLogCPM(y)
 o <- order(ab)
 adj.counts <- cpm(y, log=TRUE)
