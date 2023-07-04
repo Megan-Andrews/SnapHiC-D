@@ -7,8 +7,8 @@ library(dplyr)
 source("/home/maa160/SnapHiC-D/R/utilities.R")
 
 input_directory <- "/project/compbio-lab/scHi-C/Lee2019/Human_single_cell_100kb_cool/"  
-A_file_list_path <- "/home/maa160/SnapHiC-D/experiments/2023-06-23/diffHiC/file_lists/ODC_1_100kb_file_list.txt"  
-B_file_list_path <- "/home/maa160/SnapHiC-D/experiments/2023-06-23/diffHiC/file_lists/ODC_2_100kb_file_list.txt" 
+A_file_list_path <- "/home/maa160/SnapHiC-D/experiments/2023-06-29/multiHiCcompare_ODC/file_lists/ODC_1_100kb_file_list.txt"  
+B_file_list_path <- "/home/maa160/SnapHiC-D/experiments/2023-06-29/multiHiCcompare_ODC/file_lists/ODC_2_100kb_file_list.txt" 
 A_file_list <- readLines(A_file_list_path)
 B_file_list <- readLines(B_file_list_path)
 
