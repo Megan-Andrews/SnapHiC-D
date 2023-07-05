@@ -26,7 +26,8 @@ rm(mg_file_list,typeB_files, typeA_files)
 
 gc()
 print("filtering uninteresting bin pairs") 
-keep <- aveLogCPM(asDGEList(diffhic_obj)) > 0
+# keep <- aveLogCPM(asDGEList(diffhic_obj)) > 0
+keep <- rowSums(assay(diffhic_obj)>0) > ncol(assay(diffhic_obj))*0.1
 diffhic_obj <- diffhic_obj[keep,]
 y <- asDGEList(diffhic_obj)
 i <- interactions(diffhic_obj)
