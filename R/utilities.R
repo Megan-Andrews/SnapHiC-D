@@ -110,11 +110,18 @@ make_diffhic_object <- function(input_format, files, chr_name,
     mats = lapply(dfs, df2mat, chr_size = chr_size, resolution = resolution)
   }
   else if (input_format == 'cool'){
-    mats = list()
-    for(file in files){
+   mats <- list()
+    for (file in files) {
       print(file)
-      mat = cool2matrix(file, chr =chr_name)
-      mats[[length(mats)+1]] = mat
+      tryCatch(
+        {
+          mat <- cool2mat(file, chr_name = chr_name)
+          mats[[length(mats) + 1]] <- mat
+        },
+        error = function(err) {
+          print("HDF5 error")
+        }
+      )
     }
     # mats = lapply(files, cool2matrix, chr = chr_name)
   }
