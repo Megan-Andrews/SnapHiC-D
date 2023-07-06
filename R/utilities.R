@@ -113,7 +113,7 @@ make_diffhic_object <- function(input_format, files, chr_name,
     mats = list()
     for(file in files){
       print(file)
-      mat = cool2mat(file, chr_name = chr_name)
+      mat = cool2matix(file, chr_name = chr_name)
       mats[[length(mats)+1]] = mat
     }
     # mats = lapply(files, cool2matrix, chr = chr_name)
