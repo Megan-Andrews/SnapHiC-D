@@ -30,6 +30,8 @@ hicexp = make_multiHiCcompare_object('cool', c(typeA_files,typeB_files), 'chr22'
                                      chrom_sizes, 100000,
                                      c(rep('A', A_num), rep('B', B_num)))
 
+print("filtering")
+print(hicexp)
 
 print("normalization") 
 MD_hicexp(hicexp,plot.loess = TRUE)

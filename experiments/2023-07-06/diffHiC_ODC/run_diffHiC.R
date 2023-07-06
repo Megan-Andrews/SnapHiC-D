@@ -15,16 +15,17 @@ B_file_list_path <- "/home/maa160/SnapHiC-D/experiments/2023-07-06/diffHiC_ODC/f
 A_file_list <- readLines(A_file_list_path)
 B_file_list <- readLines(B_file_list_path)
 
-typeA_files = paste0(input_directory, B_file_list_path)
+typeA_files = paste0(input_directory, A_file_list)
 typeB_files = paste0(input_directory, B_file_list)
 
 A_num = length(A_file_list)
 B_num = length(B_file_list)
 
+chrom_sizes = '/home/maa160/SnapHiC-D/ext/hg19.chrom.sizes'
 output_path = "/home/maa160/SnapHiC-D/experiments/2023-07-06/diffHiC_ODC/results/"
 
 print("loading data")
-diffhic_obj = make_diffhic_object('cool', c(typeA_files,typeB_files), 'chr22','/home/maa160/SnapHiC-D/ext/hg19.chrom.sizes', 100000)
+diffhic_obj = make_diffhic_object('cool', c(typeA_files,typeB_files), 'chr22',chrom_sizes, 100000)
 rm(cool2matrix, cool2sparse, df2mat, make_diffhic_object, make_multiHiCcompare_object)
 rm(input_directory, astro_file_list_path, mg_file_list_path, astro_file_list)
 rm(mg_file_list,typeB_files, typeA_files)
