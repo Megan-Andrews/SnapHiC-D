@@ -21,6 +21,7 @@ typeB_files = paste0(input_directory, B_file_list)
 
 chrom_sizes = '/home/maa160/SnapHiC-D/ext/hg19.chrom.sizes'
 
+output_path =  "/home/maa160/SnapHiC-D/experiments/2023-07-06/multiHiCcompare_ODC/results/"
 
 ### multiHiCcompare 
 
@@ -28,6 +29,8 @@ print("loading data (intrinsic filtering)")
 hicexp = make_multiHiCcompare_object('cool', c(typeA_files,typeB_files), 'chr22',
                                      chrom_sizes, 100000,
                                      c(rep('A', A_num), rep('B', B_num)))
+
+
 print("normalization") 
 MD_hicexp(hicexp,plot.loess = TRUE)
 norm_hicexp = cyclic_loess(hicexp, verbose = FALSE, 
@@ -40,9 +43,11 @@ norm_hicexp = hic_glm(norm_hicexp,design,coef=ncol(design))
 
 
 print("analysis") 
-diffhic.res = results.r[,c('start1', 'start2', 'logFC', 'PValue', 'FDR')]
+# diffhic.res = results.r[,c('start1', 'start2', 'logFC', 'PValue', 'FDR')]
 multi.res = results(norm_hicexp)[,c('region1', 'region2', 'logFC', 'p.value', 'p.adj')]
-colnames(diffhic.res) = c('region1', 'region2', 'logFC', 'p.value', 'p.adj')
-diffhic.res[,c('region2','region1')] = diffhic.res[,c('region1','region2')]*100000
-res = inner_join(x=diffhic.res,multi.res,by=c('region1'='region1', 'region2'='region2'))
+write.csv(multi.res, file = paste0(output_path, "multiHiCcompare_ODC_results.csv"), row.names = FALSE)
+
+# colnames(diffhic.res) = c('region1', 'region2', 'logFC', 'p.value', 'p.adj')
+# diffhic.res[,c('region2','region1')] = diffhic.res[,c('region1','region2')]*100000
+# res = inner_join(x=diffhic.res,multi.res,by=c('region1'='region1', 'region2'='region2'))
 
