@@ -1,6 +1,7 @@
 library('rhdf5')
 library(pryr)
 library(InteractionSet)
+#TODO: add txt loader
 
 ### this function is from https://github.com/TaoYang-dev/hicrep/blob/master/R/cool2matrix.R
 cool2matrix <- function(file, chr = 'chr1') {
