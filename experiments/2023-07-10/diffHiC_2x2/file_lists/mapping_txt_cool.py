@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np  
 
-file_path = '/home/maa160/SnapHiC-D/ext/Lee_Astro_samples.txt'  # Replace with the actual file path
-output_file = '/home/maa160/SnapHiC-D/experiments/2023-07-10/diffHiC_2x2/file_lists/Astro_10kb_file_list.txt'
+file_path = '/Users/megan/Projects/SnapHiC-D/ext/Lee_MG_samples.txt'  # Replace with the actual file path
+output_file = '/Users/megan/Projects/SnapHiC-D/experiments/2023-07-10/diffHiC_2x2/file_lists/MG_10kb_file_list.txt'
 
 filenames = []
 
@@ -12,7 +12,7 @@ with open(file_path, 'r') as file:
         file_name = line.strip()  # Remove leading/trailing whitespace and newline characters
         filenames.append(file_name)
 
-metadata = pd.read_csv('/project/compbio-lab/scHi-C/Lee2019/sn-m3c-seq-metadata.txt', sep='\t')
+metadata = pd.read_csv('/Users/megan/Projects/SnapHiC-D/ext/sn-m3c-seq-metadata.txt', sep='\t')
 id2ct = {metadata['id'][i]: metadata['cell_type'][i] for i in range(metadata.shape[0])}
 
 def get_id(filename):
