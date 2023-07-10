@@ -1,7 +1,7 @@
 import cooler
 
 
-file_path = '/Users/megan/Projects/SnapHiC-D/experiments/2023-07-10/diffHiC_2x2/file_lists/MG_10kb_Batch_A_file_list.txt'
+file_path = '/home/maa160/SnapHiC-D/experiments/2023-07-10/diffHiC_2x2/file_lists/MG_10kb_Batch_A_file_list.txt'
 output_path = 'scHi-C_link/Lee2019/pseudo-bulk_data/MG/MG_10kb_Batch_A.cool'
 
 filenames = []

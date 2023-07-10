@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np  
 
+
+# Map scHiC data in .txt format to corresponding .cool files
+
 file_path = '/Users/megan/Projects/SnapHiC-D/ext/Lee_MG_samples.txt'  # Replace with the actual file path
 output_file = '/Users/megan/Projects/SnapHiC-D/experiments/2023-07-10/diffHiC_2x2/file_lists/MG_10kb_file_list.txt'
 
