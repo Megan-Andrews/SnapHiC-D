@@ -1,0 +1,2 @@
+MG_10kb_Batch_A.cool
+MG_10kb_Batch_B.cool

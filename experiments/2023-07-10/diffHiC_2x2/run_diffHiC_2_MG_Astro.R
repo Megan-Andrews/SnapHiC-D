@@ -10,11 +10,13 @@ library(dplyr)
 
 source("/home/maa160/SnapHiC-D/R/utilities.R")
 
-input_directory <- "/project/compbio-lab/scHi-C/Lee2019/Human_single_cell_10kb_cool/"  
+input_directory_Astro <- "/project/compbio-lab/scHi-C/Lee2019/pseudo-bulk_data/Astro/"  
+input_directory_MG <- "/project/compbio-lab/scHi-C/Lee2019/pseudo-bulk_data/MG/"  
+
 experiment_directory <- "/home/maa160/SnapHiC-D/experiments/2023-07-10/diffHiC_2x2/"
 result_directory <- paste0(experiment_directory, "results/")
-astro_file_list_path <- paste0(experiment_directory, "file_lists/Astro_10kb_file_list.txt") 
-mg_file_list_path <- paste0( experiment_directory, "file_lists/MG_10kb_file_list.txt") 
+astro_file_list_path <- paste0(experiment_directory, "file_lists/Astro_10kb_Bulk_file_list.txt") 
+mg_file_list_path <- paste0( experiment_directory, "file_lists/MG_10kb_Bulk_file_list.txt") 
 astro_file_list <- readLines(astro_file_list_path)
 mg_file_list <- readLines(mg_file_list_path)
 
