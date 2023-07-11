@@ -47,38 +47,7 @@ get_diffHiC_results <- function(chr){
     y <- normOffsets(asDGEList(diffhic_obj), se.out=TRUE)
     print(paste("Object size: y ", object_size(y)))
 
-    print("adjusted counts")
-    adj.counts <- cpm(asDGEList(diffhic_obj) , log=TRUE)
-    
     rm(diffhic_obj)
-    gc()
-
-
-    print("aveLogCPM")
-    ab <- aveLogCPM(y)
-    print(object_size(ab))
-    o <- order(ab)
-    gc()
-
-    print("adj.counts")
-    adj.counts <- cpm(y, log=TRUE)
-    print(object_size(adj.counts )) # 404.16 MB
-    mval <- adj.counts[,3]-adj.counts[,2]
-    gc()
-
-    print("smoothScatter")
-    smoothScatter(ab, mval, xlab="A", ylab="M", 
-                main="Astro (1) vs. MG (2) \n after normalization")
-
-    fit <- loessFit(x=ab, y=mval)
-    lines(ab[o], fit$fitted[o], col="red")
-    dev.off()
-
-    rm(fit)
-    rm(ab)
-    rm(o)
-    rm(mval)
-    rm(adj.counts)
     gc()
 
     print("modeling and testing" )
