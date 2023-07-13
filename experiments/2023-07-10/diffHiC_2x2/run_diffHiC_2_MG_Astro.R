@@ -44,12 +44,16 @@ get_diffHiC_results <- function(chr, resolution, typeA_files, typeB_files, chrom
     gene_transcript$TSS.Bin <- ceiling(gene_transcript$TSS / resolution)
     gene_transcript <- unique(gene_transcript$TSS.Bin)
 
-    keep <- rowSums(assay(diffhic_obj)>0) > ncol(assay(diffhic_obj))*0.1  # keep <- aveLogCPM(asDGEList(diffhic_obj)) > 0
-    diffhic_obj <- diffhic_obj[keep,] # all the values are true
+    # keep <- rowSums(assay(diffhic_obj)>0) > ncol(assay(diffhic_obj))*0.1  # keep <- aveLogCPM(asDGEList(diffhic_obj)) > 0
+    # diffhic_obj <- diffhic_obj[keep,] # all the values are true
 
     # print(dim(keep))
-    print(assay(diffhic_obj))
-    print(aveLogCPM(asDGEList(diffhic_obj)) > 0)
+    # print(assay(diffhic_obj))
+    # print(aveLogCPM(asDGEList(diffhic_obj)) > 0)
+    png("Average Abundance Histogram.png")
+    ave.ab <- aveLogCPM(asDGEList(diffhic_obj))
+    hist(ave.ab, xlab="Average abundance", col="grey80", main="")
+    dev.off()
     # print(rowSums(assay(diffhic_obj)>0))
     # print(ncol(assay(diffhic_obj))*0.1)
 
