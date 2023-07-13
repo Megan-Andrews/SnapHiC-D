@@ -49,9 +49,9 @@ get_diffHiC_results <- function(chr, resolution, typeA_files, typeB_files, chrom
 
     # print(dim(keep))
     print(assay(diffhic_obj))
-    # print(assay(diffhic_obj)>0)
-    print(rowSums(assay(diffhic_obj)>0))
-    print(ncol(assay(diffhic_obj))*0.1)
+    print(aveLogCPM(asDGEList(diffhic_obj)) > 0)
+    # print(rowSums(assay(diffhic_obj)>0))
+    # print(ncol(assay(diffhic_obj))*0.1)
 
     # print(gene_transcript)
     # print(filter_regions)
@@ -124,7 +124,8 @@ get_diffHiC_results("chr21", 10000, typeA_files, typeB_files, chrom_sizes)
 # write.csv(all_chr_result, file = paste0(result_directory, "diffHiC_MG_Astro_results.csv") , row.names = FALSE)
 
 
-
+rm(list = ls())
+gc() # collect garbage
 
 
 
