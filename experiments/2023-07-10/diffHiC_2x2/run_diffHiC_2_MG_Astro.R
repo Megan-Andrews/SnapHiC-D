@@ -49,7 +49,10 @@ get_diffHiC_results <- function(chr, resolution, typeA_files, typeB_files, chrom
 
     # print(dim(keep))
     print(assay(diffhic_obj))
-    print(assay(diffhic_obj)>0)
+    # print(assay(diffhic_obj)>0)
+    print(rowSums(assay(diffhic_obj)>0))
+    print(ncol(assay(diffhic_obj))*0.1)
+
     # print(gene_transcript)
     # print(filter_regions)
     print(diffhic_obj)
