@@ -47,8 +47,9 @@ get_diffHiC_results <- function(chr, resolution, typeA_files, typeB_files, chrom
     keep <- rowSums(assay(diffhic_obj)>0) > ncol(assay(diffhic_obj))*0.1  # keep <- aveLogCPM(asDGEList(diffhic_obj)) > 0
     diffhic_obj <- diffhic_obj[keep,] # all the values are true
 
-    print(dim(keep))
+    # print(dim(keep))
     print(assay(diffhic_obj))
+    print(assay(diffhic_obj)>0)
     # print(gene_transcript)
     # print(filter_regions)
     print(diffhic_obj)
