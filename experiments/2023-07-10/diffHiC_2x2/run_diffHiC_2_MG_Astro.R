@@ -23,8 +23,8 @@ mg_file_list_path <- paste0(experiment_directory, "file_lists/MG_10kb_Bulk_file_
 astro_file_list <- readLines(astro_file_list_path)
 mg_file_list <- readLines(mg_file_list_path)
 
-typeA_files = paste0(input_directory, astro_file_list)
-typeB_files = paste0(input_directory, mg_file_list)
+typeA_files = paste0(input_directory_Astro, astro_file_list)
+typeB_files = paste0(input_directory_MG, mg_file_list)
 
 chrs <- paste0("chr", c(1:22, "X", "Y"))
 
