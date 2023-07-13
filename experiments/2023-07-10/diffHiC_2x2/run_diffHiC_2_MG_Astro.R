@@ -45,9 +45,10 @@ get_diffHiC_results <- function(chr, resolution, typeA_files, typeB_files, chrom
     gene_transcript <- unique(gene_transcript$TSS.Bin)
 
     keep <- rowSums(assay(diffhic_obj)>0) > ncol(assay(diffhic_obj))*0.1  # keep <- aveLogCPM(asDGEList(diffhic_obj)) > 0
-    diffhic_obj <- diffhic_obj[keep,]
+    diffhic_obj <- diffhic_obj[keep,] # all the values are true
 
-    # print(keep)
+    print(dim(keep))
+    print(assay(diffhic_obj))
     # print(gene_transcript)
     # print(filter_regions)
     print(diffhic_obj)
