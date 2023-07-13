@@ -42,7 +42,7 @@ get_diffHiC_results <- function(chr, resolution, typeA_files, typeB_files, chrom
 
     gene_transcript <- gene_transcript[gene_transcript$chr == chr, ]
     gene_transcript$TSS.Bin <- ceiling(gene_transcript$TSS / resolution)
-    gene_transcript <- unique(g$TSS.Bin)
+    gene_transcript <- unique(gene_transcript$TSS.Bin)
 
     keep <- rowSums(assay(diffhic_obj)>0) > ncol(assay(diffhic_obj))*0.1  # keep <- aveLogCPM(asDGEList(diffhic_obj)) > 0
     diffhic_obj <- diffhic_obj[keep,]
