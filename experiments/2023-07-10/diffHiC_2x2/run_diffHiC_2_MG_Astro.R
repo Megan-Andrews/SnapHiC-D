@@ -56,7 +56,7 @@ get_diffHiC_results <- function(chr, resolution, typeA_files, typeB_files, chrom
     keep <- aveLogCPM(asDGEList(diffhic_obj)) > 2
     diffhic_obj <- diffhic_obj[keep,]
 
-
+    return (diffhic_obj)
     # png("Average Abundance Histogram.png")
     # ave.ab <- aveLogCPM(asDGEList(diffhic_obj))
     # hist(ave.ab, xlab="Average abundance", col="grey80", main="")
@@ -65,4 +65,5 @@ get_diffHiC_results <- function(chr, resolution, typeA_files, typeB_files, chrom
 
     
 
-get_diffHiC_results("chr21", 10000, typeA_files, typeB_files, chrom_sizes)
+diffhic_obj = get_diffHiC_results("chr21", 10000, typeA_files, typeB_files, chrom_sizes)
+
