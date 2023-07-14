@@ -118,10 +118,10 @@ results.r <- data.frame(inter.frame, result$table, FDR=adj.p)
 o.r <- order(results.r$PValue)
 results.r = results.r[o.r,]
 
-write.csv(results.r, file = "/home/maa160/SnapHiC-D/experiments/2023-07-10/diffHiC_2x2/diffHiC_MG_Astro_results.csv", row.names = FALSE)
+# write.csv(results.r, file = "/home/maa160/SnapHiC-D/experiments/2023-07-10/diffHiC_2x2/diffHiC_MG_Astro_results.csv", row.names = FALSE)
 
 
-# png("Average Abundance Histogram.png")
-# ave.ab <- aveLogCPM(asDGEList(data))
-# hist(ave.ab, xlab="Average abundance", col="grey80", main="")
-# dev.off()
+png("Average Abundance Histogram.png")
+ave.ab <- aveLogCPM(asDGEList(data))
+hist(ave.ab, xlab="Average abundance", col="grey80", main="")
+dev.off()
