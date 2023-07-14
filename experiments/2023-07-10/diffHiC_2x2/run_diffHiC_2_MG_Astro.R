@@ -61,8 +61,8 @@ get_diffHiC_results <- function(chr, resolution, typeA_files, typeB_files, chrom
 
 }
 
-data = get_diffHiC_results("chr17", 10000, typeA_files, typeB_files, chrom_sizes)     
-for (chr in chrs[18:22]){
+data = get_diffHiC_results("chr1", 10000, typeA_files, typeB_files, chrom_sizes)     
+for (chr in chrs[2:22]){
     print(chr)
     diffhic_obj = get_diffHiC_results(chr, 10000, typeA_files, typeB_files, chrom_sizes)
     print(diffhic_obj)
