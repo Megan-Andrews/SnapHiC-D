@@ -46,8 +46,8 @@ get_diffHiC_results <- function(chr, resolution, typeA_files, typeB_files, chrom
     gene_transcript$TSS.Bin <- ceiling(gene_transcript$TSS / resolution)
     gene_transcript <- unique(gene_transcript$TSS.Bin)
 
-    keep <- aveLogCPM(asDGEList(diffhic_obj)) > 2 # should this filtering be applied first
-    diffhic_obj <- diffhic_obj[keep,]
+    # keep <- aveLogCPM(asDGEList(diffhic_obj)) > 2 # should this filtering be applied first
+    # diffhic_obj <- diffhic_obj[keep,]
 
     binIds <- anchorIds(diffhic_obj, type="both")
     keep_filter_regions = !(binIds$first %in% filter_regions) & !(binIds$second %in% filter_regions)
