@@ -4,6 +4,11 @@ library(purrr)
 library(InteractionSet)
 library(dplyr)
 library(data.table)
+library(Matrix)
+library(sparsesvd)
+library(umap)
+library(csaw)
+library(multiHiCcompare)
 #TODO: add txt loader
 
 ### this function is from https://github.com/TaoYang-dev/hicrep/blob/master/R/cool2matrix.R
@@ -134,30 +139,29 @@ make_diffhic_object <- function(input_format, files, chr_name,
   return(data)
 }
 
-make_multiHiCcompare_object <- function(input_format, files, chr_name, 
-                                        chr_size_file, resolution, groups){
-  if (input_format == 'txt'){
-    dfs = lapply(files, function(f){
-      df = read.table(f)
-      colnames(df) = c('bin1_id', 'bin2_id', 'count')
-      df$chr = chr_name
-      df = df[,c('chr', 'bin1_id', 'bin2_id', 'count')]
-      return (df)
-    })
-  }
-  else if (input_format == 'cool'){
-    dfs = lapply(files, cool2sparse, chr = chr_name, resolution = resolution)
-  }
-  else{
-    print('txt or cool formats are available.')
-    return 
-  }
-  hicexp = make_hicexp(data_list=dfs, groups = groups, A.min = 5, zero.p = 1)
-  return(hicexp)
-}
+# make_multiHiCcompare_object <- function(input_format, files, chr_name, 
+#                                         chr_size_file, resolution, groups){
+#   if (input_format == 'txt'){
+#     dfs = lapply(files, function(f){
+#       df = read.table(f)
+#       colnames(df) = c('bin1_id', 'bin2_id', 'count')
+#       df$chr = chr_name
+#       df = df[,c('chr', 'bin1_id', 'bin2_id', 'count')]
+#       return (df)
+#     })
+#   }
+#   else if (input_format == 'cool'){
+#     dfs = lapply(files, cool2sparse, chr = chr_name, resolution = resolution)
+#   }
+#   else{
+#     print('txt or cool formats are available.')
+#     return 
+#   }
+#   hicexp = make_hicexp(data_list=dfs, groups = groups, A.min = 5, zero.p = 1)
+#   return(hicexp)
+# }
 
 bin_hic <- function(df, resolution){
-  st = Sys.time()
   df$bin1_id = as.integer(df$bin1_id/resolution)
   df$bin2_id = as.integer(df$bin2_id/resolution)
   min_bin_id = pmin(df$bin1_id, df$bin2_id)
@@ -167,7 +171,6 @@ bin_hic <- function(df, resolution){
   d_threshold = max(1000000/resolution,10)
   df = df[df$bin2_id-df$bin1_id <= d_threshold,]
   binned_df <- setDT(df)[,list(count=.N),names(df)]
-  print(paste0('binning takes ', Sys.time()-st))
   binned_df
 }
 
@@ -190,13 +193,11 @@ make_regions_vecs <- function(regions_df, include, chrom_size_filepath,
 
 read_hic_df <- function(path, chrom_columns, pos_columns, resolution,
                         filter_regions_path, TSS_regions_path, chrom_size_filepath){
-  st = Sys.time()
   df = data.frame(fread(path, sep = "\t"))
   df = df[df[,chrom_columns[1]]==df[,chrom_columns[2]],]
   df = df[df[,chrom_columns[1]] %in% paste0('chr', c(1:22)),]
   df = df[,c(chrom_columns[1],pos_columns)]
   colnames(df) = c('chr', 'bin1_id', 'bin2_id')
-  print(paste0('reading file takes ', Sys.time()-st))
   binned_df = bin_hic(df,resolution)
   
   # only including valid bins 
@@ -239,6 +240,21 @@ rbind_hic_dfs <- function(hic_dfs){
   })
   all_hic_df = rbindlist(all_hic_df)
   all_hic_df
+}
+
+# input: list of hic dataframes including chr, bin1_id, bin2_id, and count columns
+# input: resolution
+# input: vector of cell types corresponding to cells
+# output: hicexp object for multiHiCcompare
+# TODO: zero.p is used for single cell resolution, A.min for pseudobulk?
+
+make_hicexp_obj <- function(hic_dfs, res, groups){
+  hicexp_dfs = lapply(hic_dfs, function(df){
+    df = df[df$bin1_id!=df$bin2_id,]
+    df[,c(2,3)] = df[,c(2,3)]*res
+    data.frame(df)
+  })
+  hicexp = make_hicexp(data_list=hicexp_dfs, groups = groups, A.min = 0, zero.p = 0.9)
 }
 
 # input: one hic dataframe including chr, bin1_id, bin2_id, count, and cell columns
@@ -289,7 +305,7 @@ make_iset <- function(dfs){
 hic_embedding <- function(hic_data, format, groups){
   if (format == 'mat'){
     hic_mat = as(hic_data, 'sparseMatrix')
-    hic_mat = hic_data[,colSums(hic_data!=0)>20]
+    hic_mat = hic_mat[,colSums(hic_mat!=0)>20]
   }
   if (format == 'df'){
     hic_df = hic_data
