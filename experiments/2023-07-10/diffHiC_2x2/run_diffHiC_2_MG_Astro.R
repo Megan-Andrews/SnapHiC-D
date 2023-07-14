@@ -71,6 +71,56 @@ for (chr in chrs[18:22]){
 }
 data 
 
+y <- asDGEList(data)
+
+# normalization
+y <- normOffsets(y, se.out=TRUE)
+
+# par(mfrow=c(1,2))
+# ab <- aveLogCPM(asDGEList(data))
+# o <- order(ab)
+# adj.counts <- cpm(asDGEList(data), log=TRUE)
+# mval <- adj.counts[,3]-adj.counts[,2]
+
+# smoothScatter(ab, mval, xlab="A", ylab="M", 
+#               main="MG (1) vs. Astro (2) \n before normalization")
+# fit <- loessFit(x=ab, y=mval)
+# lines(ab[o], fit$fitted[o], col="red")
+
+# savePlot(filename = "before_normalization.png", type = "png", width = 8, height = 6)
+
+
+# ab <- aveLogCPM(y)
+# o <- order(ab)
+# adj.counts <- cpm(y, log=TRUE)
+# mval <- adj.counts[,3]-adj.counts[,2]
+# smoothScatter(ab, mval, xlab="A", ylab="M", 
+#               main="MG (1) vs. Astro (2) \n after normalization")
+# fit <- loessFit(x=ab, y=mval)
+# lines(ab[o], fit$fitted[o], col="red")
+# print("saving")
+# savePlot(filename = "after_normalization.png", type = "png", width = 8, height = 6)
+
+# dev.off()
+
+
+# modeling and testing 
+group = factor(c(rep(1,length(typeA_files)) , rep(2, length(typeB_files))))
+design = model.matrix(~group)
+y <- estimateDisp(y, design)
+fit <- glmQLFit(y, design, robust=TRUE)
+result <- glmQLFTest(fit)
+adj.p <- p.adjust(result$table$PValue, method="BH")
+sum(adj.p <= 0.05)
+useful.cols <- as.vector(outer(c("seqnames", "start", "end"), 1:2, paste0))
+inter.frame <- as.data.frame(interactions(data))[,useful.cols]
+results.r <- data.frame(inter.frame, result$table, FDR=adj.p)
+o.r <- order(results.r$PValue)
+results.r = results.r[o.r,]
+
+write.csv(results.r, file = "/home/maa160/SnapHiC-D/experiments/2023-07-10/diffHiC_2x2/diffHiC_MG_Astro_results.csv", row.names = FALSE)
+
+
 # png("Average Abundance Histogram.png")
 # ave.ab <- aveLogCPM(asDGEList(data))
 # hist(ave.ab, xlab="Average abundance", col="grey80", main="")
