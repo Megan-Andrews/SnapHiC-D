@@ -46,16 +46,18 @@ get_diffHiC_results <- function(chr, resolution, typeA_files, typeB_files, chrom
     gene_transcript$TSS.Bin <- ceiling(gene_transcript$TSS / resolution)
     gene_transcript <- unique(gene_transcript$TSS.Bin)
 
-    print(diffhic_obj$regions)
-    print(gene_transcript)
-    print(filter_regions)
 
-    keep <- aveLogCPM(asDGEList(diffhic_obj)) > 2
-    diffhic_obj <- diffhic_obj[keep,]
+    # keep <- aveLogCPM(asDGEList(diffhic_obj)) > 2 # should this filtering be applied first
+    # diffhic_obj <- diffhic_obj[keep,]
 
-    keep <- aveLogCPM(asDGEList(diffhic_obj)) > 2
-    diffhic_obj <- diffhic_obj[keep,]
+    # binIds <- anchorIds(diffhic_obj, type="both")
+    # keep_filter_regions = !(binIds$first %in% filter_regions) & !(binIds$second %in% filter_regions)
+    # diffhic_obj <- diffhic_obj[keep_filter_regions,]
 
+    # binIds <- anchorIds(diffhic_obj, type="both")
+    # keep_gene_transcript = (binIds$first %in% gene_transcript) & (binIds$second %in% gene_transcript)
+    # diffhic_obj <- diffhic_obj[keep_gene_transcript,]
+    
     return (diffhic_obj)
     # png("Average Abundance Histogram.png")
     # ave.ab <- aveLogCPM(asDGEList(diffhic_obj))
@@ -63,7 +65,15 @@ get_diffHiC_results <- function(chr, resolution, typeA_files, typeB_files, chrom
     # dev.off()
 }
 
-    
-
+data = null     
+for (chr in chrs){
+    print(chr)
+    diffhic_obj = get_diffHiC_results(chr, 10000, typeA_files, typeB_files, chrom_sizes)
+    if (is.null(data)){
+        data = diffhic_obj
+    } else {
+        data = rbind(data, diffhic_obj)
+    }
+}
 diffhic_obj = get_diffHiC_results("chr21", 10000, typeA_files, typeB_files, chrom_sizes)
 
