@@ -46,8 +46,8 @@ get_diffHiC_results <- function(chr, resolution, typeA_files, typeB_files, chrom
     gene_transcript$TSS.Bin <- ceiling(gene_transcript$TSS / resolution)
     gene_transcript <- unique(gene_transcript$TSS.Bin)
 
-    keep <- aveLogCPM(asDGEList(diffhic_obj)) > 2 # should this filtering be applied first
-    diffhic_obj <- diffhic_obj[keep,]
+    # keep <- aveLogCPM(asDGEList(diffhic_obj)) > 2 # should this filtering be applied first
+    # diffhic_obj <- diffhic_obj[keep,]
 
     binIds <- anchorIds(diffhic_obj, type="both")
     keep_filter_regions = !(binIds$first %in% filter_regions) & !(binIds$second %in% filter_regions)
@@ -75,34 +75,6 @@ y <- asDGEList(data)
 
 # normalization
 y <- normOffsets(y, se.out=TRUE)
-
-# par(mfrow=c(1,2))
-# ab <- aveLogCPM(asDGEList(data))
-# o <- order(ab)
-# adj.counts <- cpm(asDGEList(data), log=TRUE)
-# mval <- adj.counts[,3]-adj.counts[,2]
-
-# smoothScatter(ab, mval, xlab="A", ylab="M", 
-#               main="MG (1) vs. Astro (2) \n before normalization")
-# fit <- loessFit(x=ab, y=mval)
-# lines(ab[o], fit$fitted[o], col="red")
-
-# savePlot(filename = "before_normalization.png", type = "png", width = 8, height = 6)
-
-
-# ab <- aveLogCPM(y)
-# o <- order(ab)
-# adj.counts <- cpm(y, log=TRUE)
-# mval <- adj.counts[,3]-adj.counts[,2]
-# smoothScatter(ab, mval, xlab="A", ylab="M", 
-#               main="MG (1) vs. Astro (2) \n after normalization")
-# fit <- loessFit(x=ab, y=mval)
-# lines(ab[o], fit$fitted[o], col="red")
-# print("saving")
-# savePlot(filename = "after_normalization.png", type = "png", width = 8, height = 6)
-
-# dev.off()
-
 
 # modeling and testing 
 group = factor(c(rep(1,length(typeA_files)) , rep(2, length(typeB_files))))
