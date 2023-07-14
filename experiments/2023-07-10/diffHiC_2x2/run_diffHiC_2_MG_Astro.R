@@ -46,36 +46,31 @@ get_diffHiC_results <- function(chr, resolution, typeA_files, typeB_files, chrom
     gene_transcript$TSS.Bin <- ceiling(gene_transcript$TSS / resolution)
     gene_transcript <- unique(gene_transcript$TSS.Bin)
 
+    keep <- aveLogCPM(asDGEList(diffhic_obj)) > 2 # should this filtering be applied first
+    diffhic_obj <- diffhic_obj[keep,]
 
-    # keep <- aveLogCPM(asDGEList(diffhic_obj)) > 2 # should this filtering be applied first
-    # diffhic_obj <- diffhic_obj[keep,]
+    binIds <- anchorIds(diffhic_obj, type="both")
+    keep_filter_regions = !(binIds$first %in% filter_regions) & !(binIds$second %in% filter_regions)
+    diffhic_obj <- diffhic_obj[keep_filter_regions,]
 
-    # binIds <- anchorIds(diffhic_obj, type="both")
-    # keep_filter_regions = !(binIds$first %in% filter_regions) & !(binIds$second %in% filter_regions)
-    # diffhic_obj <- diffhic_obj[keep_filter_regions,]
-
-    # binIds <- anchorIds(diffhic_obj, type="both")
-    # keep_gene_transcript = (binIds$first %in% gene_transcript) & (binIds$second %in% gene_transcript)
-    # diffhic_obj <- diffhic_obj[keep_gene_transcript,]
+    binIds <- anchorIds(diffhic_obj, type="both")
+    keep_gene_transcript = (binIds$first %in% gene_transcript) & (binIds$second %in% gene_transcript)
+    diffhic_obj <- diffhic_obj[keep_gene_transcript,]
     
     return (diffhic_obj)
 
 }
 
-data = null     
-for (chr in chrs){
+data = get_diffHiC_results("chr17", 10000, typeA_files, typeB_files, chrom_sizes)     
+for (chr in chrs[18:22]){
     print(chr)
     diffhic_obj = get_diffHiC_results(chr, 10000, typeA_files, typeB_files, chrom_sizes)
-    if (is.null(data)){
-        data = diffhic_obj
-    } else {
-        data = rbind(data, diffhic_obj)
-    }
+    print(diffhic_obj)
+    data = rbind(data, diffhic_obj)
 }
-
 data 
 
-    png("Average Abundance Histogram.png")
-    ave.ab <- aveLogCPM(asDGEList(diffhic_obj))
-    hist(ave.ab, xlab="Average abundance", col="grey80", main="")
-    dev.off()
+png("Average Abundance Histogram.png")
+ave.ab <- aveLogCPM(asDGEList(data))
+hist(ave.ab, xlab="Average abundance", col="grey80", main="")
+dev.off()
