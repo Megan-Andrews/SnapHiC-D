@@ -59,10 +59,7 @@ get_diffHiC_results <- function(chr, resolution, typeA_files, typeB_files, chrom
     # diffhic_obj <- diffhic_obj[keep_gene_transcript,]
     
     return (diffhic_obj)
-    # png("Average Abundance Histogram.png")
-    # ave.ab <- aveLogCPM(asDGEList(diffhic_obj))
-    # hist(ave.ab, xlab="Average abundance", col="grey80", main="")
-    # dev.off()
+
 }
 
 data = null     
@@ -75,5 +72,10 @@ for (chr in chrs){
         data = rbind(data, diffhic_obj)
     }
 }
-diffhic_obj = get_diffHiC_results("chr21", 10000, typeA_files, typeB_files, chrom_sizes)
 
+data 
+
+    png("Average Abundance Histogram.png")
+    ave.ab <- aveLogCPM(asDGEList(diffhic_obj))
+    hist(ave.ab, xlab="Average abundance", col="grey80", main="")
+    dev.off()
