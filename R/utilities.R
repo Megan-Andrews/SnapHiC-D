@@ -48,7 +48,7 @@ cool2matrix <- function(file, chr = 'chr1') {
   }
   chrom.ranges <- (chrom.range[1]+1):(chrom.range[2]+1)
   # mat <- as.data.frame(mat)
-  
+  print(paste0("mat size: ", object_size(mat)  ))
   return(mat)
 }
 
