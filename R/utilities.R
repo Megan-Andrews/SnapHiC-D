@@ -111,6 +111,7 @@ make_diffhic_object <- function(input_format, files, chr_name,
     mats = lapply(dfs, df2mat, chr_size = chr_size, resolution = resolution)
   }
   else if (input_format == 'cool'){
+    print('get cool files.')
     mats = lapply(files, cool2matrix, chr = chr_name)
   }
   else{
