@@ -8,135 +8,87 @@ library(csaw)
 library(statmod)
 library(dplyr)
 
-source("/home/maa160/SnapHiC-D/R/utilities.R")
+snap_dir = "/home/maa160/SnapHiC-D/"
 
-input_directory <- "/project/compbio-lab/scHi-C/Lee2019/Human_single_cell_10kb_cool/"  
-experiment_directory <- "/home/maa160/SnapHiC-D/experiments/2023-07-10/diffHiC_100x100/"
+source(paste0(snap_dir, "R/utilities.R"))
+
+chrom_size_filepath <- paste0(snap_dir, 'ext/hg19.chrom.sizes')
+filter_regions_path <- paste0(snap_dir, "ext/hg19_filter_regions.txt")
+TSS_regions_path <- paste0(snap_dir, "/ext/hg19.refGene.transcript.TSS.061421.txt")
+
+experiment_directory <- paste0(snap_dir, "experiments/2023-07-10/diffHiC_100x100/")
 result_directory <- paste0(experiment_directory, "results/")
-astro_file_list_path <- paste0(experiment_directory, "file_lists/Astro_10kb_file_list.txt") 
-mg_file_list_path <- paste0( experiment_directory, "file_lists/MG_10kb_file_list.txt") 
-astro_file_list <- readLines(astro_file_list_path)
-mg_file_list <- readLines(mg_file_list_path)
 
-typeA_files = paste0(input_directory, astro_file_list)
-typeB_files = paste0(input_directory, mg_file_list)
+astro_file_list_path <- paste0(snap_dir, "ext/Lee_Astro_samples.txt")
+mg_file_list_path <- paste0(snap_dir,"ext/Lee_MG_samples.txt")
+typeA_files <- readLines(astro_file_list_path)
+typeB_files <- readLines(mg_file_list_path)
+
+chrs = paste0("chr", c(1:22))
 
 print("loading data")
-diffhic_obj = make_diffhic_object('cool', c(typeA_files,typeB_files), 'chr22','/home/maa160/SnapHiC-D/ext/hg19.chrom.sizes', 100000)
-rm(cool2matrix, cool2sparse, df2mat, make_diffhic_object, make_multiHiCcompare_object)
-rm(input_directory, experiment_directory, astro_file_list_path, mg_file_list_path, astro_file_list, mg_file_list,typeB_files, typeA_files)
-gc()
+dfs = lapply(c(typeA_files, typeB_files), read_hic_df, chrom_columns=c(2,4),pos_columns=c(3,5), filter_regions_path=filter_regions_path, TSS_regions_path=TSS_regions_path, chrom_size_filepath=chrom_size_filepath, resolution=10000)
+# bandnorm_df = bandnorm(hic_df)
+# rm(dfs);gc()
+# only including valid bins 
+for (i in 1:length(dfs)){
+  df = dfs[[i]]
+  filter_regions = fread(filter_regions_path)
+  filter_regions = filter_regions[,c(1:2)]
+  colnames(filter_regions) = c('chr','start')
+  filter_regions$bin_id = as.integer(filter_regions$start/10000)
+  filter_vecs = make_regions_vecs(filter_regions, FALSE, chrom_size_filepath, 
+                                  paste0('chr', c(1:22)), 10000)
+  is_valid = function(x){filter_vecs[[x['chr']]][as.integer(x['bin1_id'])] & 
+      filter_vecs[[x['chr']]][as.integer(x['bin2_id'])]}
+  valid = apply(df, 1, is_valid)
+  valid = as.numeric(valid)
+  valid[is.na(valid)] = 0
+  
+  # # only including TSS regions 
+  TSS_regions = fread(TSS_regions_path)
+  TSS_regions$bin_id = as.integer((TSS_regions$start+TSS_regions$end)/(2*10000))
+  TSS_vecs = make_regions_vecs(TSS_regions, TRUE, chrom_size_filepath, 
+                               paste0('chr', c(1:22)), 10000)
+  #return(list('TSS_vecs'=TSS_vecs,'df'=binned_df))
+  is_TSS = function(x){TSS_vecs[[x['chr']]][as.integer(x['bin1_id'])] |
+      TSS_vecs[[x['chr']]][as.integer(x['bin2_id'])]}
+  TSS = apply(df, 1, is_TSS)
+  TSS = as.numeric(TSS)
+  TSS[is.na(TSS)] = 0
+  dfs[[i]] = df[valid&TSS,]
+}
 
-print("filtering uninteresting bin pairs") 
-keep <- rowSums(assay(diffhic_obj)>0) > ncol(assay(diffhic_obj))*0.1  # keep <- aveLogCPM(asDGEList(diffhic_obj)) > 0
-diffhic_obj <- diffhic_obj[keep,]
-y <- asDGEList(diffhic_obj)
-i <- interactions(diffhic_obj)
-print(object_size(y))
-rm(keep)
-gc()
+isets = make_iset(dfs)
+assayNames(isets) = 'counts'
 
-print("normalization")
-y <- normOffsets(asDGEList(diffhic_obj), se.out=TRUE)
-print(paste("Object size: y ", object_size(y)))
+print("filtering uninteresting bin pairs")  # apply filtering first
+keep <- rowSums(assay(isets)>0) > ncol(assay(isets))*0.1  # keep <- aveLogCPM(asDGEList(diffhic_obj)) > 0
+isets <- isets[keep,]
 
+y <- asDGEList(isets)
 
-print("visualization")
-# par(mfrow=c(1,2))
-png(filename = paste0(result_directory, "before_loess_smoothing.png"), width = 800, height = 600)
+# normalization
+y <- normOffsets(y, se.out=TRUE)
 
-
-print("aveLogCPM")
-print(object_size(y))
-ab <- aveLogCPM(asDGEList(diffhic_obj))
-print(object_size(ab))
-o <- order(ab)
-
-print("adjusted counts")
-adj.counts <- cpm(asDGEList(diffhic_obj) , log=TRUE)
-rm(diffhic_obj)
-gc()
-
-print(object_size(adj.counts ))
-mval <- adj.counts[,3]-adj.counts[,2]
-
-print("smoothScatter")
-smoothScatter(ab, mval, xlab="A", ylab="M", 
-              main="Astro (1) vs. MG (2) \n before normalization")
-
-print("loessFit")
-fit <- loessFit(x=ab, y=mval)
-lines(ab[o], fit$fitted[o], col="red")
-
-dev.off()
-png(filename = paste0(result_directory, "after_loess_smoothing.png") , width = 800, height = 600)
-gc()
-
-print("aveLogCPM")
-ab <- aveLogCPM(y)
-print(object_size(ab))
-o <- order(ab)
-gc()
-
-print("adj.counts")
-adj.counts <- cpm(y, log=TRUE)
-print(object_size(adj.counts )) # 404.16 MB
-mval <- adj.counts[,3]-adj.counts[,2]
-gc()
-
-print("smoothScatter")
-smoothScatter(ab, mval, xlab="A", ylab="M", 
-              main="Astro (1) vs. MG (2) \n after normalization")
-
-fit <- loessFit(x=ab, y=mval)
-lines(ab[o], fit$fitted[o], col="red")
-dev.off()
-
-rm(fit)
-rm(ab)
-rm(o)
-rm(mval)
-rm(adj.counts)
-gc()
-
-print("modeling and testing" )
-group = factor(c(rep(1, 449), rep(2, 422)))
+# modeling and testing 
+group = factor(c(rep(1,length(typeA_files)) , rep(2, length(typeB_files))))
 design = model.matrix(~group)
-rm(group)
-
-y <- estimateDisp(y, design) # From edgeR 
-print(object_size(y)) # 809.80 MB
-
-gc()
-print("glmQLFit")
+y <- estimateDisp(y, design)
 fit <- glmQLFit(y, design, robust=TRUE)
-rm(design)
-rm(y)
-gc()
-
-print("glmQLFTest")
 result <- glmQLFTest(fit)
-print(object_size(result))
-
-gc()
-print("adj.p")
 adj.p <- p.adjust(result$table$PValue, method="BH")
 sum(adj.p <= 0.05)
-print(object_size(adj.p))
-
-print("useful.cols")
 useful.cols <- as.vector(outer(c("seqnames", "start", "end"), 1:2, paste0))
-print(object_size(adj.p))
-inter.frame <- as.data.frame(i)[,useful.cols]
-print(object_size(inter.frame))
+inter.frame <- as.data.frame(interactions(isets))[,useful.cols]
 results.r <- data.frame(inter.frame, result$table, FDR=adj.p)
-print(object_size(results.r ))
 o.r <- order(results.r$PValue)
 results.r = results.r[o.r,]
-print(object_size(results.r ))
 
-write.csv(results.r, file = paste0(result_directory, "diffHiC_MG_Astro_results.csv") , row.names = FALSE)
-
+write.csv(results.r, file = paste0(snap_dir, "experiments/2023-07-10/diffHiC_100x100/results/diffHiC_MG_Astro_results.csv"), row.names = FALSE)
 
 
-
+png("Average Abundance Histogram.png")
+ave.ab <- aveLogCPM(asDGEList(isets))
+hist(ave.ab, xlab="Average abundance", col="grey80", main="")
+dev.off()
