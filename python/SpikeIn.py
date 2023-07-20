@@ -78,6 +78,9 @@ def main():
 
     print('writing simulated data.')
 
+    bins = cooler.Cooler(cond1_coollist[0]).bins().fetch(CHR)
+    bins.index = range(bins.shape[0])
+
     cond1_dir = os.path.join(output_dir, 'cond1')
     cond2_dir = os.path.join(output_dir, 'cond2')
     if not os.path.exists(cond1_dir):
@@ -92,9 +95,22 @@ def main():
         #print(us(df[key]))
         intrinsic_noise = [normal(0, us(m)) for m in df[key]]
         df['cond2'] = np.maximum(np.round((df[key] + intrinsic_noise)*df['FC']), 0)
-        df[keyCoord + [key]].to_csv(os.path.join(cond1_dir, 'cell{}.txt'.format(k)), sep = "\t", header = None, index = False)
+
+        # write condition1 cell
+        pixels = df[keyCoord + [key]].copy()
+        pixels.rename(columns = {key: 'count'}, inplace = True)
+        cooler.create_cooler(os.path.join(cond1_dir, 'cell{}.cool'.format(k+1)),
+                    bins = bins,
+                    pixels = pixels)
+        #df[keyCoord + [key]].to_csv(os.path.join(cond1_dir, 'cell{}.txt'.format(k)), sep = "\t", header = None, index = False)
+        # write condition2 cell
         df = df[df['cond2']!=0]
-        df[keyCoord + ['cond2']].to_csv(os.path.join(cond2_dir, 'cell{}.txt'.format(k)), sep = "\t", header = None, index = False)
+        pixels = df[keyCoord + ['cond2']].copy()
+        pixels.rename(columns = {'cond2': 'count'}, inplace = True)
+        cooler.create_cooler(os.path.join(cond2_dir, 'cell{}.cool'.format(k+1)),
+                    bins = bins,
+                    pixels = pixels)
+        #df[keyCoord + ['cond2']].to_csv(os.path.join(cond2_dir, 'cell{}.txt'.format(k)), sep = "\t", header = None, index = False)
 
 def read_cool(coolpath, count_colname):
 
@@ -104,6 +120,7 @@ def read_cool(coolpath, count_colname):
     #df = df[df['bin2_id'] < df['bin1_id'] + 200]
     df.rename(columns = {'count': count_colname}, inplace = True)
     return df
+
 
 def create_parser():
     parser = argparse.ArgumentParser()
