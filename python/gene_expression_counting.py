@@ -1,7 +1,7 @@
 import pandas as pd
 
 # read csv file
-df = pd.read_csv("/home/maa160/SnapHiC-D/experiments/2023-07-10/diffHiC_2x2/diffHiC_MG_Astro_results.csv", sep=",")
+df = pd.read_csv("/Users/megan/Projects/SnapHiC-D/experiments/2023-07-10/diffHiC_100x100/diffHiC_MG_Astro_results.csv", sep=",")
 
 # count all the interactions
 print("All interactions: ", df.count())
