@@ -303,12 +303,14 @@ make_iset <- function(dfs){
   merged_df =  Reduce(function(dt1,dt2){merge.data.table(dt1,dt2,all.x = TRUE)}, 
                       dfs)
   merged_df[is.na(merged_df)] = 0
+  chrs = merged_df$chr
   source_gr = GRanges(seqnames = merged_df$chr, 
                       ranges = IRanges(merged_df$bin1_id, end = merged_df$bin1_id+1))
   target_gr = GRanges(seqnames = merged_df$chr,
                       ranges = IRanges(merged_df$bin2_id, end = merged_df$bin2_id+1))
   GI = GInteractions(source_gr, target_gr)
   iset = InteractionSet(as(merged_df[,4:ncol(merged_df)], 'matrix'), GI)
+  elementMetadata(iset) = chrs
   iset
 }
 
@@ -352,3 +354,113 @@ hic_embedding <- function(hic_data, format, groups){
 }
 
 
+# input: one hic dataframe including chr, bin1_id, bin2_id, and count columns
+# output: one hic dataframe that has been filtered to 
+  # exclude filter regions, and only include TSS regions
+filter_df <- function(df, filter_regions_path, TSS_regions_path){
+  filter_regions = fread(filter_regions_path)
+  filter_regions = filter_regions[,c(1:2)]
+  colnames(filter_regions) = c('chr','start')
+  filter_regions$bin_id = as.integer(filter_regions$start/10000)
+  filter_vecs = make_regions_vecs(filter_regions, FALSE, chrom_size_filepath, 
+                                  paste0('chr', c(1:22)), 10000)
+  is_valid = function(x){filter_vecs[[x['chr']]][as.integer(x['bin1_id'])] & 
+      filter_vecs[[x['chr']]][as.integer(x['bin2_id'])]}
+  valid = apply(df, 1, is_valid)
+  valid = as.numeric(valid)
+  valid[is.na(valid)] = 0
+  
+  # # only including TSS regions 
+  TSS_regions = fread(TSS_regions_path)
+  TSS_regions$bin_id = as.integer((TSS_regions$start+TSS_regions$end)/(2*10000))
+  TSS_vecs = make_regions_vecs(TSS_regions, TRUE, chrom_size_filepath, 
+                               paste0('chr', c(1:22)), 10000)
+  #return(list('TSS_vecs'=TSS_vecs,'df'=binned_df))
+  is_TSS = function(x){TSS_vecs[[x['chr']]][as.integer(x['bin1_id'])] |
+      TSS_vecs[[x['chr']]][as.integer(x['bin2_id'])]}
+  TSS = apply(df, 1, is_TSS)
+  TSS = as.numeric(TSS)
+  TSS[is.na(TSS)] = 0
+  df = df[valid&TSS,]
+  return(df)
+}
+
+# input: one InteractionSet object
+# output: one InteractionSet that has been filtered to 
+# exclude filter regions, and only include TSS regions
+filter_regions_iset <- function(iset, filter_regions_path){  
+  filter_regions = fread(filter_regions_path)
+  filter_regions = filter_regions[,c(1:2)]
+  colnames(filter_regions) = c('chr','start')
+  filter_regions$bin_id = as.integer(filter_regions$start/10000)
+  filter_regions_dt = as.data.table(filter_regions)
+  filter_regions_dt$include = rep(FALSE, length(filter_regions_dt$chr))
+  
+  chrs <- elementMetadata(isets)$X
+  binIds <- anchorIds(isets, type="both")
+  binId_dt <- data.table(bin1_id = binIds$first, bin2_id=binIds$second, chrs=chrs) 
+
+  # Perform the join and filtering operation
+  binId_dt = left_join(binId_dt, filter_regions_dt, by = c("bin1_id" = "bin_id", "chrs" ="chr"))
+  binId_dt = left_join(binId_dt, filter_regions_dt, by = c("bin2_id" = "bin_id", "chrs" ="chr"))
+  binId_dt[is.na(include.x), include.x := TRUE]
+  binId_dt[is.na(include.y), include.y := TRUE]
+  
+  keep_filter_regions = binId_dt$include.x & binId_dt$include.y
+  isets <- isets[keep_filter_regions,]
+  
+  return(isets)
+}
+
+
+# input: one InteractionSet object
+# output: one InteractionSet that has been filtered to 
+# exclude filter regions, and only include TSS regions
+TSS_filter_iset <- function(iset, TSS_regions_path){  
+  # # only including TSS regions 
+  TSS_regions = fread(TSS_regions_path)
+  TSS_regions$bin_id = as.integer((TSS_regions$start+TSS_regions$end)/(2*10000))
+  TSS_regions_dt = as.data.table(TSS_regions)
+  TSS_regions_dt$include = rep(TRUE, length(TSS_regions_dt$chr))
+  TSS_regions_dt = unique(TSS_regions_dt[,c("bin_id","include","chr")])
+  
+  chrs <- elementMetadata(isets)$X
+  binIds <- anchorIds(isets, type="both")
+  binId_dt <- data.table(bin1_id = binIds$first, bin2_id=binIds$second, chrs=chrs) 
+  
+  # Perform the join and filtering operation
+  binId_dt = left_join(binId_dt, TSS_regions_dt, by = c("bin1_id" = "bin_id", "chrs" ="chr"))
+  binId_dt = left_join(binId_dt, TSS_regions_dt, by = c("bin2_id" = "bin_id", "chrs" ="chr"))
+  binId_dt[is.na(include.x), include.x := FALSE]
+  binId_dt[is.na(include.y), include.y := FALSE]
+  
+  keep_gene_transcript = binId_dt$include.x & binId_dt$include.y
+  isets <- isets[keep_gene_transcript,]
+
+  return(isets)
+}
+
+### TODO: coarsen_iset?
+# input: one InteractionSet
+# input: n_groups, the number pseudo_bulk groups per cell type
+coarsen_iset <- function(isets, n_groups){
+  n_samples = dim(assay(isets))[2]
+  if ((n_samples/2) %% n_groups != 0){
+    print("pseudo-bulk will not have the same number of samples")
+    return(NULL)
+  }
+  
+  group_size = (n_samples/2) / n_groups
+  for (i in seq(1, n_samples - group_size + 1, by = group_size)) {
+    new_col <- rowSums(assay(isets)[, i:(i + group_size - 1)])
+    col_name <- paste0("coarse_", i, "-", i + group_size - 1)
+    col_names = colnames(isets)
+    col_names[ceiling(i/group_size)]=col_name
+    colnames(isets)=col_names
+    assay(isets)[, ceiling(i/group_size)]= new_col
+  }
+  
+  # Remove the original columns
+  isets = isets[, 1:(n_samples/group_size)]
+  return(isets)
+}
