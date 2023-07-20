@@ -9,6 +9,7 @@ library(sparsesvd)
 library(umap)
 library(csaw)
 library(multiHiCcompare)
+library(pbapply)
 #TODO: add txt loader
 
 ### this function is from https://github.com/TaoYang-dev/hicrep/blob/master/R/cool2matrix.R
@@ -192,10 +193,12 @@ make_regions_vecs <- function(regions_df, include, chrom_size_filepath,
 ### TODO: faster filtering? filtering before or after normalization?
 
 read_hic_df <- function(path, chrom_columns, pos_columns, resolution,
-                        filter_regions_path, TSS_regions_path, chrom_size_filepath){
+                        filter_regions_path, TSS_regions_path, chrom_size_filepath,
+                        chromosomes){
   df = data.frame(fread(path, sep = "\t"))
   df = df[df[,chrom_columns[1]]==df[,chrom_columns[2]],]
-  df = df[df[,chrom_columns[1]] %in% paste0('chr', c(1:22)),]
+  #df = df[df[,chrom_columns[1]] %in% paste0('chr', c(1:22)),]
+  df = df[df[,chrom_columns[1]] %in% chromosomes,]
   df = df[,c(chrom_columns[1],pos_columns)]
   colnames(df) = c('chr', 'bin1_id', 'bin2_id')
   binned_df = bin_hic(df,resolution)
@@ -226,6 +229,21 @@ read_hic_df <- function(path, chrom_columns, pos_columns, resolution,
   # TSS[is.na(TSS)] = 0
   # binned_df = binned_df[valid&TSS,]
   binned_df
+}
+
+read_hic_cool <- function(cond1_cooldir, cond2_cooldir, chr){
+  coolpaths = lapply(list(cond1_cooldir, cond2_cooldir), function(p){
+    file.path(p,list.files(p))})
+  groups = unlist(lapply(c(1:2), function(i){
+    rep(paste0('cond', i), length(coolpaths[[i]]))}))
+  coolpaths = unlist(coolpaths)
+  all_pixels = pblapply(c(1:length(coolpaths)), function(coolpaths, id){print(id)
+    pixels <- h5read(coolpaths[id], c('pixels'));H5close()
+    pixels = data.frame(pixels)
+    pixels$chr = chr
+    pixels[c('chr', 'bin1_id', 'bin2_id', 'count')]
+  }, coolpaths = coolpaths)
+  all_pixels
 }
 
 # input: list of hic dataframes including chr, bin1_id, bin2_id, and count columns
@@ -320,7 +338,7 @@ hic_embedding <- function(hic_data, format, groups){
     hic_mat = sparseMatrix(i = hic_df$cell, j = hic_df$featureIndex, x = hic_df$count, 
                            dims = c(max(hic_df$cell), max(hic_df$featureIndex)),
                            index1 = TRUE)
-    hic_mat = hic_mat[,colSums(hic_mat!=0)>20]
+    hic_mat = hic_mat[,colSums(hic_mat!=0)>dim(hic_mat)[2]/10]
   }
   
   pca_mat = sparsesvd(hic_mat, 20)
