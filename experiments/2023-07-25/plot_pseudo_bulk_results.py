@@ -16,6 +16,7 @@ batch_21_DCC = pd.read_csv(batch_21_DCC, sep="\t", header=None, names=["bin1_id"
 batch_29_DCC = pd.read_csv(batch_29_DCC, sep="\t", header=None, names=["bin1_id", "bin2_id", "LogFC_ground_truth"])
 
 def create_plots(batch, filter_type):
+    print(batch, " ", filter_type)
     if batch == "Astro_MG_190315_21yr":
         batch_df = batch_21_DCC
     else:
@@ -33,14 +34,15 @@ def create_plots(batch, filter_type):
         print(df.columns)
         df = df[['start1', 'start2', 'logFC', 'FDR']]
         df = df.rename(columns={"start1": "bin1_id", "start2": "bin2_id"})
-        df = df.merge(batch_df, on=["bin1_id", "bin2_id"])
+        df = df.merge(batch_df, on=["bin1_id", "bin2_id"], how="outer")
         df = df[['logFC', 'LogFC_ground_truth']]
-
+        print(df)
         FN = df["logFC"].isna().sum()
         FP = df["LogFC_ground_truth"].isna().sum()
         TP = df.shape[0] - FN
         TN = df.shape[0] - FP
         accuracy = (TP + TN) / (TP + TN + FP + FN)
+        print(FN, FP, TP, TN, accuracy)
         # Create a new DataFrame with the row data
         new_row = pd.DataFrame({"TP": [TP], "TN": [TN], "FP": [FP], "FN": [FN], "Experiment Size": [e], "Accuracy": [accuracy]})
 
