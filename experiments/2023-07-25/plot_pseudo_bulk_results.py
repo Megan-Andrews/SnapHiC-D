@@ -65,3 +65,9 @@ def create_plots(batch, filter_type):
     plt.title(f"Accuracy - {batch} - {filter_type}")
     plt.savefig(f"Accuracy_{batch}_{filter_type}_plot.png")
     plt.close()
+
+
+create_plots("Astro_MG_190315_21yr", "filterA")
+create_plots("Astro_MG_190315_21yr", "filterB")
+create_plots("Astro_MG_190315_29yr", "filterA")
+create_plots("Astro_MG_190315_29yr", "filterB")
