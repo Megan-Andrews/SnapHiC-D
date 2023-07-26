@@ -24,26 +24,30 @@ def create_plots(batch, filter_type):
     result_df = pd.DataFrame(columns=["Error", "Experiment Size"])
     accuracy_df = pd.DataFrame(columns=["TP", "TN", "FP", "FN", "Experiment Size", "Accuracy"])
 
-    for e in experiment_sizes:
-        file_name = f"diffHiC_Astro_MG_{batch}_{e}x{e}_{filter_type}_results.csv"
+    for e in e_sized:
+        file_name = f"diffHiC_{batch}_{e}x{e}_{filter_type}_results.csv"
         file_path = os.path.join(result_dir, file_name)
         # Read the CSV file into a pandas DataFrame
         df = pd.read_csv(file_path)
         df = df[df["FDR"] < 0.05]
-        df = df[['start1', 'start2' 'LogFC', 'FDR']]
+        print(df.columns)
+        df = df[['start1', 'start2', 'logFC', 'FDR']]
         df = df.rename(columns={"start1": "bin1_id", "start2": "bin2_id"})
         df = df.merge(batch_df, on=["bin1_id", "bin2_id"])
-        df = df[['LogFC', 'LogFC_ground_truth']]
-        
-        FN = df["LogFC"].isna().sum()
+        df = df[['logFC', 'LogFC_ground_truth']]
+
+        FN = df["logFC"].isna().sum()
         FP = df["LogFC_ground_truth"].isna().sum()
         TP = df.shape[0] - FN
         TN = df.shape[0] - FP
         accuracy = (TP + TN) / (TP + TN + FP + FN)
-        accuracy_df = accuracy_df.append({"TP": TP, "TN": TN, "FP": FP, "FN": FN, "Experiment Size": e, "Accuracy": accuracy}, ignore_index=True)
+        # Create a new DataFrame with the row data
+        new_row = pd.DataFrame({"TP": [TP], "TN": [TN], "FP": [FP], "FN": [FN], "Experiment Size": [e], "Accuracy": [accuracy]})
 
+        # Concatenate the new DataFrame with the original DataFrame
+        accuracy_df = pd.concat([accuracy_df, new_row], ignore_index=True)
         df = df.fillna(1)
-        df["Error"] = (df["LogFC"] - df["LogFC_ground_truth"])^2
+        df["Error"] = (df["logFC"] - df["LogFC_ground_truth"])**2
         df["Experiment Size"] = e
         df= df[["Error", "Experiment Size"]]
 
@@ -51,7 +55,7 @@ def create_plots(batch, filter_type):
 
     # Plotting the data
     plt.figure()
-    plt.scatter(df["Experiment Size"], result_df["Error"], alpha=0.7)
+    plt.scatter(result_df["Experiment Size"], result_df["Error"], alpha=0.7)
     plt.xlabel("Experiment Size")
     plt.ylabel("LogFC Error^2")
     plt.title(f"LogFC Error - {batch} - {filter_type}")
