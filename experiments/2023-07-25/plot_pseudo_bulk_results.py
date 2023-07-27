@@ -48,20 +48,37 @@ def create_plots(batch, filter_type):
 
         # Concatenate the new DataFrame with the original DataFrame
         accuracy_df = pd.concat([accuracy_df, new_row], ignore_index=True)
-        df = df.fillna(1)
-        df["Error"] = (df["logFC"] - df["LogFC_ground_truth"])**2
-        df["Experiment Size"] = e
-        df= df[["Error", "Experiment Size"]]
+        TP_df = df[df["LogFC_ground_truth"].notna() & df["logFC"].notna()].copy()
+        FP_df = df[df["LogFC_ground_truth"].isna() & df["logFC"].notna()].copy()
+        FN_df = df[df["LogFC_ground_truth"].notna() & df["logFC"].isna()].copy()
+
+        FP_df = FP_df.fillna(1)
+        FN_df = FN_df.fillna(1)
+
+        TP_df["Error"] = (TP_df["logFC"] - TP_df["LogFC_ground_truth"])**2
+        TP_df["Experiment Size"] = e
+        TP_df= TP_df[["Error", "Experiment Size"]]
+
+        FP_df["Error"] = (FP_df["logFC"] - FP_df["LogFC_ground_truth"])**2
+        FP_df["Experiment Size"] = e
+        FP_df = FP_df[["Error", "Experiment Size"]]
+
+        FN_df["Error"] = (FN_df["logFC"] - FN_df["LogFC_ground_truth"])**2
+        FN_df["Experiment Size"] = e
+        FN_df = FN_df[["Error", "Experiment Size"]]
 
         result_df = pd.concat([result_df, df], ignore_index=True)
 
     # Plotting the data
     plt.figure()
-    plt.scatter(result_df["Experiment Size"], result_df["Error"], alpha=0.7)
+    plt.scatter(TP_df["Experiment Size"], TP_df["Error"], alpha=0.7, c="blue")
+    plt.scatter(FP_df["Experiment Size"], FP_df["Error"], alpha=0.7, c="red")
+    plt.scatter(FN_df["Experiment Size"], FN_df["Error"], alpha=0.7, c="green")
+    plt.legend(["TP", "FP", "FN"])
     plt.xlabel("Experiment Size")
     plt.ylabel("LogFC Error^2")
     plt.title(f"LogFC Error - {batch} - {filter_type}")
-    plt.savefig(f"LFC_{batch}_{filter_type}_plot.png")
+    plt.savefig(f"LFC_ground_{batch}_{filter_type}_plot.png")
     plt.close()
 
     plt.figure()
