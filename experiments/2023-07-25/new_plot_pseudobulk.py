@@ -68,7 +68,7 @@ def create_plots(batch, filter_type):
     plt.xlabel("Experiment Size")
     plt.ylabel("LogFC Error^2")
     plt.title(f"LogFC Error - {batch} - {filter_type}")
-    plt.savefig(f"LFC_{batch}_{filter_type}_plot.png")
+    plt.savefig(f"LFC_ground_{batch}_{filter_type}_plot.png")
     plt.close()
 
     plt.figure()
