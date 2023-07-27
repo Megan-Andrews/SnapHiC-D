@@ -63,6 +63,7 @@ def create_plots(batch, filter_type):
         df["Error"] = (df["logFC"] - df["LogFC_ground_truth"])**2
         df["Experiment Size"] = e
         df = df[[ "accuracy", "logFC", "LogFC_ground_truth"]]
+        result_df = pd.concat([result_df, df], ignore_index=True)
 
         # Plotting the data
         plt.figure()
