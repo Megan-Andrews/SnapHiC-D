@@ -22,7 +22,7 @@ def create_plots(batch, filter_type):
     else:
         batch_df = batch_29_DCC
 
-    r_df = pd.DataFrame(columns=["accuracy","Error", "Experiment Size"])
+    result_df = pd.DataFrame(columns=["Error", "Experiment Size"])
     accuracy_df = pd.DataFrame(columns=["TP", "TN", "FP", "FN", "Experiment Size", "Accuracy"])
 
     for e in e_sized:
@@ -36,7 +36,7 @@ def create_plots(batch, filter_type):
         df = df.rename(columns={"start1": "bin1_id", "start2": "bin2_id"})
         df = df.merge(batch_df, on=["bin1_id", "bin2_id"], how="outer")
         df = df[['logFC', 'LogFC_ground_truth']]
-        
+        print(df)
         FN = df["logFC"].isna().sum()
         FP = df["LogFC_ground_truth"].isna().sum()
         TP = df.shape[0] - FN - FP
@@ -48,27 +48,20 @@ def create_plots(batch, filter_type):
 
         # Concatenate the new DataFrame with the original DataFrame
         accuracy_df = pd.concat([accuracy_df, new_row], ignore_index=True)
-        df[df["LogFC_ground_truth"].notna() & df["logFC"].notna()]["accuracy"] = "TP"
-        df[df["LogFC_ground_truth"].isna() & df["logFC"].notna()]["accuracy"]  = "FP"
-        df[df["LogFC_ground_truth"].notna() & df["logFC"].isna()]["accuracy"]  = "FN"
-
         df = df.fillna(1)
         df["Error"] = (df["logFC"] - df["LogFC_ground_truth"])**2
         df["Experiment Size"] = e
-        df = df[[ "accuracy","Error", "Experiment Size"]]
+        df= df[["Error", "Experiment Size"]]
 
-        r_df = pd.concat([r_df, df], ignore_index=True)
+        result_df = pd.concat([result_df, df], ignore_index=True)
 
     # Plotting the data
     plt.figure()
-    plt.scatter(r_df[r_df["accuracy"]=="TP"]["Experiment Size"], r_df["Error"], alpha=0.7, c="blue")
-    plt.scatter(r_df[r_df["accuracy"]=="FP"]["Experiment Size"], r_df["Error"], alpha=0.7, c="red")
-    plt.scatter(r_df[r_df["accuracy"]=="FN"]["Experiment Size"], r_df["Error"], alpha=0.7, c="green")
-    plt.legend(["TP","FN","FP"])
+    plt.scatter(result_df["Experiment Size"], result_df["Error"], alpha=0.7)
     plt.xlabel("Experiment Size")
     plt.ylabel("LogFC Error^2")
     plt.title(f"LogFC Error - {batch} - {filter_type}")
-    plt.savefig(f"LFC_ground_{batch}_{filter_type}_plot.png")
+    plt.savefig(f"LFC_{batch}_{filter_type}_plot.png")
     plt.close()
 
     plt.figure()

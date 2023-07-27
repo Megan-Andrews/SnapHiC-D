@@ -7,8 +7,7 @@ batch_21_DCC = "/project/compbio-lab/scHi-C/Lee2019/simulations/Astro_MG_190315_
 batch_29_DCC = "/project/compbio-lab/scHi-C/Lee2019/simulations/Astro_MG_190315_29yr/DCC.txt"
 
 batches = ["Astro_MG_190315_21yr", "Astro_MG_190315_29yr"]
-experiment_sizes = ["90x90", "45x45", "30x30", "18x18", "15x15", "10x10", "9x9", "6x6", "5x5", "3x3", "2x2"]
-e_sized = [90, 45, 30, 18, 15, 10, 9, 6, 5, 3, 2]
+experiment_sizes = [90, 45, 30, 18, 15, 10, 9, 6, 5, 3, 2]
 
 filters = ["filterA", "filterB"]
 
@@ -22,10 +21,10 @@ def create_plots(batch, filter_type):
     else:
         batch_df = batch_29_DCC
 
-    r_df = pd.DataFrame(columns=["accuracy","Error", "Experiment Size"])
+    result_df = pd.DataFrame(columns=["Error", "Experiment Size"])
     accuracy_df = pd.DataFrame(columns=["TP", "TN", "FP", "FN", "Experiment Size", "Accuracy"])
 
-    for e in e_sized:
+    for e in experiment_sizes:
         file_name = f"diffHiC_{batch}_{e}x{e}_{filter_type}_results.csv"
         file_path = os.path.join(result_dir, file_name)
         # Read the CSV file into a pandas DataFrame
@@ -36,7 +35,7 @@ def create_plots(batch, filter_type):
         df = df.rename(columns={"start1": "bin1_id", "start2": "bin2_id"})
         df = df.merge(batch_df, on=["bin1_id", "bin2_id"], how="outer")
         df = df[['logFC', 'LogFC_ground_truth']]
-        
+        print(df)
         FN = df["logFC"].isna().sum()
         FP = df["LogFC_ground_truth"].isna().sum()
         TP = df.shape[0] - FN - FP
@@ -48,27 +47,28 @@ def create_plots(batch, filter_type):
 
         # Concatenate the new DataFrame with the original DataFrame
         accuracy_df = pd.concat([accuracy_df, new_row], ignore_index=True)
-        df[df["LogFC_ground_truth"].notna() & df["logFC"].notna()]["accuracy"] = "TP"
-        df[df["LogFC_ground_truth"].isna() & df["logFC"].notna()]["accuracy"]  = "FP"
-        df[df["LogFC_ground_truth"].notna() & df["logFC"].isna()]["accuracy"]  = "FN"
+
+        df.loc[df["LogFC_ground_truth"].notna() & df["logFC"].notna(), "accuracy"] = "TP"
+        df.loc[df["LogFC_ground_truth"].isna() & df["logFC"].notna(), "accuracy"] = "FP"
+        df.loc[df["LogFC_ground_truth"].notna() & df["logFC"].isna(), "accuracy"] = "FN"
 
         df = df.fillna(1)
         df["Error"] = (df["logFC"] - df["LogFC_ground_truth"])**2
         df["Experiment Size"] = e
         df = df[[ "accuracy","Error", "Experiment Size"]]
 
-        r_df = pd.concat([r_df, df], ignore_index=True)
+        result_df = pd.concat([result_df, df], ignore_index=True)
 
     # Plotting the data
     plt.figure()
-    plt.scatter(r_df[r_df["accuracy"]=="TP"]["Experiment Size"], r_df["Error"], alpha=0.7, c="blue")
-    plt.scatter(r_df[r_df["accuracy"]=="FP"]["Experiment Size"], r_df["Error"], alpha=0.7, c="red")
-    plt.scatter(r_df[r_df["accuracy"]=="FN"]["Experiment Size"], r_df["Error"], alpha=0.7, c="green")
-    plt.legend(["TP","FN","FP"])
+    plt.scatter(result_df[result_df["accuracy"]=="TP"]["Experiment Size"], result_df[result_df["accuracy"]=="TP"]["Error"], alpha=0.7, c="blue")
+    plt.scatter(result_df[result_df["accuracy"]=="FP"]["Experiment Size"], result_df[result_df["accuracy"]=="FP"]["Error"], alpha=0.7, c="red")
+    plt.scatter(result_df[result_df["accuracy"]=="FN"]["Experiment Size"], result_df[result_df["accuracy"]=="FN"]["Error"], alpha=0.7, c="green")
+    plt.legend(["TP", "FP", "FN"])
     plt.xlabel("Experiment Size")
     plt.ylabel("LogFC Error^2")
     plt.title(f"LogFC Error - {batch} - {filter_type}")
-    plt.savefig(f"LFC_ground_{batch}_{filter_type}_plot.png")
+    plt.savefig(f"LFC_{batch}_{filter_type}_plot.png")
     plt.close()
 
     plt.figure()
@@ -76,7 +76,7 @@ def create_plots(batch, filter_type):
     plt.xlabel("Experiment Size")
     plt.ylabel("Accuracy")
     plt.title(f"Accuracy - {batch} - {filter_type}")
-    plt.savefig(f"Accuracy_{batch}_{filter_type}_plot.png")
+    plt.savefig(f"Accuracy_ground_{batch}_{filter_type}_plot.png")
     plt.close()
 
 
@@ -84,3 +84,4 @@ create_plots("Astro_MG_190315_21yr", "filterA")
 create_plots("Astro_MG_190315_21yr", "filterB")
 create_plots("Astro_MG_190315_29yr", "filterA")
 create_plots("Astro_MG_190315_29yr", "filterB")
+
