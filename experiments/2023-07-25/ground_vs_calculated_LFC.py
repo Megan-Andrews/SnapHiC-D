@@ -21,9 +21,6 @@ def create_plots(batch, filter_type):
     else:
         batch_df = batch_29_DCC
 
-    result_df = pd.DataFrame(columns=["logFC","accuracy","LogFC_ground_truth"])
-    accuracy_df = pd.DataFrame(columns=["TP", "TN", "FP", "FN", "Experiment Size", "accuracy"])
-
     for e in experiment_sizes:
         accuracy_df = pd.DataFrame(columns=["TP", "TN", "FP", "FN", "Experiment Size", "accuracy"])
         result_df = pd.DataFrame(columns=["Error", "Experiment Size"])
