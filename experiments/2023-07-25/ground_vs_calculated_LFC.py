@@ -21,8 +21,8 @@ def create_plots(batch, filter_type):
     else:
         batch_df = batch_29_DCC
 
-    result_df = pd.DataFrame(columns=["Error", "Experiment Size"])
-    accuracy_df = pd.DataFrame(columns=["TP", "TN", "FP", "FN", "Experiment Size", "Accuracy"])
+    result_df = pd.DataFrame(columns=["logFC","accuracy","LogFC_ground_truth"])
+    accuracy_df = pd.DataFrame(columns=["TP", "TN", "FP", "FN", "Experiment Size", "accuracy"])
 
     for e in experiment_sizes:
         file_name = f"diffHiC_{batch}_{e}x{e}_{filter_type}_results.csv"
@@ -43,7 +43,7 @@ def create_plots(batch, filter_type):
         accuracy = (TP + TN) / (TP + TN + FP + FN)
         print(FN, FP, TP, TN, accuracy)
         # Create a new DataFrame with the row data
-        new_row = pd.DataFrame({"TP": [TP], "TN": [TN], "FP": [FP], "FN": [FN], "Experiment Size": [e], "Accuracy": [accuracy]})
+        new_row = pd.DataFrame({"TP": [TP], "TN": [TN], "FP": [FP], "FN": [FN], "Experiment Size": [e], "accuracy": [accuracy]})
 
         # Concatenate the new DataFrame with the original DataFrame
         accuracy_df = pd.concat([accuracy_df, new_row], ignore_index=True)
