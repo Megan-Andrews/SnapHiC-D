@@ -71,10 +71,10 @@ def create_plots(batch, filter_type):
         plt.scatter(result_df[result_df["accuracy"]=="FP"]["LogFC_ground_truth"], result_df[result_df["accuracy"]=="FP"]["logFC"], alpha=0.5, c="red")
         plt.scatter(result_df[result_df["accuracy"]=="FN"]["LogFC_ground_truth"], result_df[result_df["accuracy"]=="FN"]["logFC"], alpha=0.5, c="purple")
         plt.scatter(result_df[result_df["accuracy"]=="TN"]["LogFC_ground_truth"], result_df[result_df["accuracy"]=="TN"]["logFC"], alpha=0.5, c="green")
-        plt.legend(["TP", "FP", "FN", "TN"])
+        plt.legend([f"TP {TP}", f"FP {FP}", f"FN {FN}", f"TN {TN}"])
         plt.xlabel("Ground LogFC")
         plt.ylabel("Calculated LogFC")
-        plt.title(f"Ground vs. Calculated LogFC - {e}x{e} - {batch} - {filter_type}")
+        plt.title(f"Ground vs. Calculated LogFC - {e}x{e} - {batch} - {filter_type} \n Accuracy: {accuracy}")
         plt.savefig(f"{e}x{e}_LFC_{batch}_{filter_type}_plot.png")
         plt.close()
 
