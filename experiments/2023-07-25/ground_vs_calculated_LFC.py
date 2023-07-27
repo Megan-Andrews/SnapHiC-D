@@ -68,9 +68,10 @@ def create_plots(batch, filter_type):
         # Plotting the data
         plt.figure()
         plt.scatter(result_df[result_df["accuracy"]=="TP"]["LogFC_ground_truth"], result_df[result_df["accuracy"]=="TP"]["logFC"], alpha=0.5, c="blue")
-        plt.scatter(result_df[result_df["accuracy"]=="TN"]["LogFC_ground_truth"], result_df[result_df["accuracy"]=="TN"]["logFC"], alpha=0.5, c="green")
+        plt.scatter(result_df[result_df["accuracy"]=="FN"]["LogFC_ground_truth"], result_df[result_df["accuracy"]=="FN"]["logFC"], alpha=0.5, c="green")
         plt.scatter(result_df[result_df["accuracy"]=="FP"]["LogFC_ground_truth"], result_df[result_df["accuracy"]=="FP"]["logFC"], alpha=0.5, c="red")
-        plt.scatter(result_df[result_df["accuracy"]=="FN"]["LogFC_ground_truth"], result_df[result_df["accuracy"]=="FN"]["logFC"], alpha=0.5, c="purple")
+        plt.scatter(result_df[result_df["accuracy"]=="TN"]["LogFC_ground_truth"], result_df[result_df["accuracy"]=="TN"]["logFC"], alpha=0.5, c="purple")
+        plt.legend(["TP","FN","FP","TN"])
         plt.xlabel("Ground LogFC")
         plt.ylabel("Calculated LogFC")
         plt.title(f"Ground vs. Calculated LogFC - {e}x{e} - {batch} - {filter_type}")
