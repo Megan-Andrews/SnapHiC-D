@@ -1,6 +1,6 @@
 library('rhdf5')
 library(pryr)
-library(purrr)
+#library(purrr)
 library(InteractionSet)
 library(dplyr)
 library(data.table)
@@ -300,7 +300,7 @@ make_iset <- function(dfs){
     colnames(df) = c('chr', 'bin1_id', 'bin2_id', paste0('count',id))
     data.table(df, key = c('chr', 'bin1_id', 'bin2_id'))
   }, data_frames = dfs)
-  merged_df =  Reduce(function(dt1,dt2){merge.data.table(dt1,dt2,all.x = TRUE)}, 
+  merged_df =  Reduce(function(dt1,dt2){merge.data.table(dt1,dt2,all = TRUE)}, 
                       dfs)
   merged_df[is.na(merged_df)] = 0
   chrs = merged_df$chr
@@ -357,13 +357,13 @@ hic_embedding <- function(hic_data, format, groups){
 # input: one hic dataframe including chr, bin1_id, bin2_id, and count columns
 # output: one hic dataframe that has been filtered to 
   # exclude filter regions, and only include TSS regions
-filter_df <- function(df, filter_regions_path, TSS_regions_path){
+filter_df <- function(df, filter_regions_path, TSS_regions_path, resolution){
   filter_regions = fread(filter_regions_path)
   filter_regions = filter_regions[,c(1:2)]
   colnames(filter_regions) = c('chr','start')
-  filter_regions$bin_id = as.integer(filter_regions$start/10000)
+  filter_regions$bin_id = as.integer(filter_regions$start/resolution)
   filter_vecs = make_regions_vecs(filter_regions, FALSE, chrom_size_filepath, 
-                                  paste0('chr', c(1:22)), 10000)
+                                  paste0('chr', c(1:22)), resolution)
   is_valid = function(x){filter_vecs[[x['chr']]][as.integer(x['bin1_id'])] & 
       filter_vecs[[x['chr']]][as.integer(x['bin2_id'])]}
   valid = apply(df, 1, is_valid)
@@ -388,12 +388,13 @@ filter_df <- function(df, filter_regions_path, TSS_regions_path){
 # input: one InteractionSet object
 # output: one InteractionSet that has been filtered to 
 # exclude filter regions, and only include TSS regions
-filter_regions_iset <- function(iset, filter_regions_path){  
+filter_regions_iset <- function(iset, filter_regions_path, resolution){  
   filter_regions = fread(filter_regions_path)
   filter_regions = filter_regions[,c(1:2)]
   colnames(filter_regions) = c('chr','start')
-  filter_regions$bin_id = as.integer(filter_regions$start/10000)
+  filter_regions$bin_id = as.integer(filter_regions$start/resolution)
   filter_regions_dt = as.data.table(filter_regions)
+  filter_regions_dt = unique(filter_regions_dt, by = c('chr','bin_id'))
   filter_regions_dt$include = rep(FALSE, length(filter_regions_dt$chr))
   
   chrs <- elementMetadata(isets)$X
@@ -416,10 +417,10 @@ filter_regions_iset <- function(iset, filter_regions_path){
 # input: one InteractionSet object
 # output: one InteractionSet that has been filtered to 
 # exclude filter regions, and only include TSS regions
-TSS_filter_iset <- function(iset, TSS_regions_path){  
+TSS_filter_iset <- function(iset, TSS_regions_path, resolution){  
   # # only including TSS regions 
   TSS_regions = fread(TSS_regions_path)
-  TSS_regions$bin_id = as.integer((TSS_regions$start+TSS_regions$end)/(2*10000))
+  TSS_regions$bin_id = as.integer((TSS_regions$start+TSS_regions$end)/(2*resolution))
   TSS_regions_dt = as.data.table(TSS_regions)
   TSS_regions_dt$include = rep(TRUE, length(TSS_regions_dt$chr))
   TSS_regions_dt = unique(TSS_regions_dt[,c("bin_id","include","chr")])
