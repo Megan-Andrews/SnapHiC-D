@@ -25,6 +25,8 @@ def create_plots(batch, filter_type):
     accuracy_df = pd.DataFrame(columns=["TP", "TN", "FP", "FN", "Experiment Size", "accuracy"])
 
     for e in experiment_sizes:
+        accuracy_df = pd.DataFrame(columns=["TP", "TN", "FP", "FN", "Experiment Size", "accuracy"])
+        result_df = pd.DataFrame(columns=["Error", "Experiment Size"])
         file_name = f"diffHiC_{batch}_{e}x{e}_{filter_type}_results.csv"
         file_path = os.path.join(result_dir, file_name)
         # Read the CSV file into a pandas DataFrame
@@ -67,6 +69,7 @@ def create_plots(batch, filter_type):
 
         # Plotting the data
         plt.figure()
+        plt.clf()
         plt.scatter(result_df[result_df["accuracy"]=="TP"]["LogFC_ground_truth"], result_df[result_df["accuracy"]=="TP"]["logFC"], alpha=0.5, c="blue")
         plt.scatter(result_df[result_df["accuracy"]=="FN"]["LogFC_ground_truth"], result_df[result_df["accuracy"]=="FN"]["logFC"], alpha=0.5, c="green")
         plt.scatter(result_df[result_df["accuracy"]=="FP"]["LogFC_ground_truth"], result_df[result_df["accuracy"]=="FP"]["logFC"], alpha=0.5, c="red")
