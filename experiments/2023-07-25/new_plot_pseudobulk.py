@@ -62,13 +62,26 @@ def create_plots(batch, filter_type):
     # Plotting the data
     plt.figure()
     plt.scatter(result_df[result_df["accuracy"]=="TP"]["Experiment Size"], result_df[result_df["accuracy"]=="TP"]["Error"], alpha=0.7, c="blue")
-    plt.scatter(result_df[result_df["accuracy"]=="FP"]["Experiment Size"], result_df[result_df["accuracy"]=="FP"]["Error"], alpha=0.7, c="red")
-    plt.scatter(result_df[result_df["accuracy"]=="FN"]["Experiment Size"], result_df[result_df["accuracy"]=="FN"]["Error"], alpha=0.7, c="green")
-    plt.legend(["TP", "FP", "FN"])
     plt.xlabel("Experiment Size")
     plt.ylabel("LogFC Error^2")
     plt.title(f"LogFC Error - {batch} - {filter_type}")
-    plt.savefig(f"LFC_ground_{batch}_{filter_type}_plot.png")
+    plt.savefig(f"TP_LFC_ground_{batch}_{filter_type}_plot.png")
+    plt.close()
+
+    plt.figure()
+    plt.scatter(result_df[result_df["accuracy"]=="FP"]["Experiment Size"], result_df[result_df["accuracy"]=="FP"]["Error"], alpha=0.7, c="red")
+    plt.xlabel("Experiment Size")
+    plt.ylabel("LogFC Error^2")
+    plt.title(f"LogFC Error - {batch} - {filter_type}")
+    plt.savefig(f"FP_LFC_ground_{batch}_{filter_type}_plot.png")
+    plt.close()
+
+    plt.figure()
+    plt.scatter(result_df[result_df["accuracy"]=="FN"]["Experiment Size"], result_df[result_df["accuracy"]=="FN"]["Error"], alpha=0.7, c="green")
+    plt.xlabel("Experiment Size")
+    plt.ylabel("LogFC Error^2")
+    plt.title(f"LogFC Error - {batch} - {filter_type}")
+    plt.savefig(f"FN_LFC_ground_{batch}_{filter_type}_plot.png")
     plt.close()
 
     plt.figure()
@@ -84,4 +97,5 @@ create_plots("Astro_MG_190315_21yr", "filterA")
 create_plots("Astro_MG_190315_21yr", "filterB")
 create_plots("Astro_MG_190315_29yr", "filterA")
 create_plots("Astro_MG_190315_29yr", "filterB")
+
 
