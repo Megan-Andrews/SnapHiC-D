@@ -39,8 +39,8 @@ def create_plots(batch, filter_type):
         print(df)
         FN = df["logFC"].isna().sum()
         FP = df["LogFC_ground_truth"].isna().sum()
-        TP = df.shape[0] - FN
-        TN = df.shape[0] - FP
+        TP = df.shape[0] - FN - FP
+        TN = 514**2 - FP - FN - TP
         accuracy = (TP + TN) / (TP + TN + FP + FN)
         print(FN, FP, TP, TN, accuracy)
         # Create a new DataFrame with the row data
