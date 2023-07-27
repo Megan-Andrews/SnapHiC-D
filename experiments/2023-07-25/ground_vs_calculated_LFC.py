@@ -74,7 +74,7 @@ def create_plots(batch, filter_type):
         plt.legend([f"TP {TP}",f"FN {FN}",f"FP {FP}",f"TN {TN}"])
         plt.xlabel("Ground LogFC")
         plt.ylabel("Calculated LogFC")
-        plt.title(f"Ground vs. Calculated LogFC - {e}x{e} - {batch} - {filter_type}")
+        plt.title(f"Ground vs. Calculated LogFC - {e}x{e} - {batch} - {filter_type} \n Accuracy: {accuracy}")
         plt.savefig(f"{e}x{e}_LFC_{batch}_{filter_type}_plot.png")
         plt.close()
 
