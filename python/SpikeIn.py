@@ -27,7 +27,8 @@ def main():
     keyCoord = ["bin1_id", "bin2_id"]
     keyC1 = ["cond1_" + str(i) for i in range(1, len(cond1_coollist) + 1)]
     keyC2 = ["cond2_" + str(i) for i in range(1, len(cond2_coollist) + 1)]
-    keyNoise1 = ["noise1_" + str(i) for i in range(1, len(cond1_coollist) + 1)]
+    keyNoise1 = ["sim_cond1_" + str(i) for i in range(1, len(cond1_coollist) + 1)]
+    keyNoise2 = ["sim_cond2_" + str(i) for i in range(1, len(cond1_coollist) + 1)]
 
     total_df = read_conditions(cond1_coollist, cond2_coollist)
 
@@ -50,21 +51,21 @@ def main():
     DCC_df.to_csv(os.path.join(output_dir, 'DCC.txt'), sep = "\t", header = None, index = False)
 
     print('injecting noise and DCCs')
-    noisy_total_df = inject_noise_and_DCC(total_df, keyCoord, keyC1, keyNoise1, diag_us, nondiag_us, FCs)
+    noisy_total_df = inject_noise_and_DCC(total_df, keyCoord, keyC1, keyNoise1, keyNoise2, diag_us, nondiag_us, FCs)
 
     print('writing simulated data.')
     bins = cooler.Cooler(cond1_coollist[0]).bins().fetch(CHR)
     bins.index = range(bins.shape[0])
 
-    subdirs = [os.path.join(output_dir, 'cond1'), os.path.join(output_dir, 'cond2'), os.path.join(output_dir, 'sim_cond2')]
+    subdirs = [os.path.join(output_dir, 'cond1'), os.path.join(output_dir, 'cond2'), os.path.join(output_dir, 'sim_cond1'), os.path.join(output_dir, 'sim_cond2')]
 
     for subdir in subdirs:
         if not os.path.exists(subdir):
             os.mkdir(subdir)
 
-    column_keys = [keyC1, keyC2, keyNoise1]
+    column_keys = [keyC1, keyC2, keyNoise1, keyNoise2]
 
-    for k in range(3):
+    for k in range(4):
         c = 1
         for col_key in column_keys[k]:
             pixels = noisy_total_df[keyCoord + [col_key]].copy()
@@ -76,7 +77,7 @@ def main():
                         pixels = pixels)
             c += 1
 
-    for cond, subdir in zip(['cond1', 'cond2', 'sim_cond2'], subdirs):
+    for cond, subdir in zip(['cond1', 'cond2', 'sim_cond1', 'sim_cond2'], subdirs):
         coollist = pd.DataFrame({'cp': [os.path.join(subdir, cp) for cp in os.listdir(subdir)]})
         coollist_path = os.path.join(output_dir, '{}_coollist.txt'.format(cond))
         coollist.to_csv(coollist_path, index = False, header = None)
@@ -135,23 +136,31 @@ def get_DCC_candidates(total_df, keyCoord, keyC1, keyC2, th):
     norm_total_df = pd.concat([total_df[keyCoord], total_df[keyC1 + keyC2]/seqDep * seqDep.max()], axis = 1)
     avg_C1 = norm_total_df[keyC1].mean(axis=1)
     avg_C2 = norm_total_df[keyC2].mean(axis=1)
-    logFCs = np.log(avg_C2/avg_C1)
+    logFCs = np.log2(avg_C2/avg_C1)
     candidates_idx = (np.isfinite(logFCs)) & (abs(logFCs)>=th) & ((avg_C1 > 0.1) | (avg_C2 > 0.1))
-    FCs = np.exp(logFCs)
+    FCs = np.power(2, logFCs)
     FCs[~candidates_idx] = 1
     DCC_candidates = pd.concat([total_df[keyCoord][candidates_idx], logFCs[candidates_idx]], axis = 1)
     return FCs, DCC_candidates
 
-def inject_noise_and_DCC(df, coordKeys, orig_keys, noisy_keys, diag_us, nondiag_us, FCs):
+def inject_noise_and_DCC(df, coordKeys, orig_keys, noisy_keys1, noisy_keys2, diag_us, nondiag_us, FCs):
     diag_idx = df[coordKeys[0]] == df[coordKeys[1]]
     orig_counts = df[orig_keys].copy()
-    noisy_counts = pd.DataFrame(0, index=df.index, columns=noisy_keys)
+    noisy_counts = pd.DataFrame(0, index = df.index, columns = noisy_keys1)
     noisy_counts[diag_idx] = np.maximum(0, np.round((orig_counts[diag_idx] +
-                                                     normal(0,diag_us(orig_counts[diag_idx]))).mul(FCs, axis = 0)))
+                                                     normal(0,diag_us(orig_counts[diag_idx])))))
 
     noisy_counts[~diag_idx] = np.maximum(0, np.round((orig_counts[~diag_idx] +
+                                                      normal(0,nondiag_us(orig_counts[~diag_idx])))))
+
+    noisy_DCC_counts = pd.DataFrame(0, index = df.index, columns = noisy_keys2)
+    noisy_DCC_counts[diag_idx] = np.maximum(0, np.round((orig_counts[diag_idx] +
+                                                     normal(0,diag_us(orig_counts[diag_idx]))).mul(FCs, axis = 0)))
+
+    noisy_DCC_counts[~diag_idx] = np.maximum(0, np.round((orig_counts[~diag_idx] +
                                                       normal(0,nondiag_us(orig_counts[~diag_idx]))).mul(FCs, axis = 0)))
-    df = pd.concat([df, noisy_counts], axis = 1)
+
+    df = pd.concat([df, noisy_counts, noisy_DCC_counts], axis = 1)
     return df
 
 
