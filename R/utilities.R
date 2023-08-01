@@ -8,6 +8,7 @@ library(Matrix)
 library(sparsesvd)
 library(umap)
 library(csaw)
+library(edgeR)
 library(multiHiCcompare)
 library(pbapply)
 #TODO: add txt loader
@@ -272,7 +273,7 @@ make_hicexp_obj <- function(hic_dfs, res, groups){
     df[,c(2,3)] = df[,c(2,3)]*res
     data.frame(df)
   })
-  hicexp = make_hicexp(data_list=hicexp_dfs, groups = groups, A.min = 0, zero.p = 0.9)
+  hicexp = make_hicexp(data_list=hicexp_dfs, groups = groups, A.min = 0, zero.p = 1)
 }
 
 # input: one hic dataframe including chr, bin1_id, bin2_id, count, and cell columns
@@ -354,36 +355,6 @@ hic_embedding <- function(hic_data, format, groups){
 }
 
 
-# input: one hic dataframe including chr, bin1_id, bin2_id, and count columns
-# output: one hic dataframe that has been filtered to 
-  # exclude filter regions, and only include TSS regions
-filter_df <- function(df, filter_regions_path, TSS_regions_path, resolution){
-  filter_regions = fread(filter_regions_path)
-  filter_regions = filter_regions[,c(1:2)]
-  colnames(filter_regions) = c('chr','start')
-  filter_regions$bin_id = as.integer(filter_regions$start/resolution)
-  filter_vecs = make_regions_vecs(filter_regions, FALSE, chrom_size_filepath, 
-                                  paste0('chr', c(1:22)), resolution)
-  is_valid = function(x){filter_vecs[[x['chr']]][as.integer(x['bin1_id'])] & 
-      filter_vecs[[x['chr']]][as.integer(x['bin2_id'])]}
-  valid = apply(df, 1, is_valid)
-  valid = as.numeric(valid)
-  valid[is.na(valid)] = 0
-  
-  # # only including TSS regions 
-  TSS_regions = fread(TSS_regions_path)
-  TSS_regions$bin_id = as.integer((TSS_regions$start+TSS_regions$end)/(2*10000))
-  TSS_vecs = make_regions_vecs(TSS_regions, TRUE, chrom_size_filepath, 
-                               paste0('chr', c(1:22)), 10000)
-  #return(list('TSS_vecs'=TSS_vecs,'df'=binned_df))
-  is_TSS = function(x){TSS_vecs[[x['chr']]][as.integer(x['bin1_id'])] |
-      TSS_vecs[[x['chr']]][as.integer(x['bin2_id'])]}
-  TSS = apply(df, 1, is_TSS)
-  TSS = as.numeric(TSS)
-  TSS[is.na(TSS)] = 0
-  df = df[valid&TSS,]
-  return(df)
-}
 
 # input: one InteractionSet object
 # output: one InteractionSet that has been filtered to 
@@ -397,10 +368,10 @@ filter_regions_iset <- function(iset, filter_regions_path, resolution){
   filter_regions_dt = unique(filter_regions_dt, by = c('chr','bin_id'))
   filter_regions_dt$include = rep(FALSE, length(filter_regions_dt$chr))
   
-  chrs <- elementMetadata(isets)$X
-  binIds <- anchorIds(isets, type="both")
-  binId_dt <- data.table(bin1_id = binIds$first, bin2_id=binIds$second, chrs=chrs) 
-
+  chrs <- elementMetadata(iset)$X
+  binIds <- anchors(iset, type="both")
+  binId_dt <- data.table(bin1_id = data.frame(binIds$first)$start, 
+                         bin2_id= data.frame(binIds$second)$start, chrs=chrs) 
   # Perform the join and filtering operation
   binId_dt = left_join(binId_dt, filter_regions_dt, by = c("bin1_id" = "bin_id", "chrs" ="chr"))
   binId_dt = left_join(binId_dt, filter_regions_dt, by = c("bin2_id" = "bin_id", "chrs" ="chr"))
@@ -408,9 +379,33 @@ filter_regions_iset <- function(iset, filter_regions_path, resolution){
   binId_dt[is.na(include.y), include.y := TRUE]
   
   keep_filter_regions = binId_dt$include.x & binId_dt$include.y
-  isets <- isets[keep_filter_regions,]
+  iset <- iset[keep_filter_regions,]
   
-  return(isets)
+  return(iset)
+}
+
+filter_regions_df <- function(df, filter_regions_path, resolution){  
+  filter_regions = fread(filter_regions_path)
+  filter_regions = filter_regions[,c(1:2)]
+  colnames(filter_regions) = c('chr','start')
+  filter_regions$bin_id = as.integer(filter_regions$start/resolution)
+  filter_regions_dt = as.data.table(filter_regions)
+  filter_regions_dt = unique(filter_regions_dt, by = c('chr','bin_id'))
+  filter_regions_dt$include = rep(FALSE, length(filter_regions_dt$chr))
+  
+  binId_dt = data.table(bin1_id = df$bin1_id, 
+                        bin2_id = df$bin2_id, 
+                        chr = df$chr) 
+  # Perform the join and filtering operation
+  binId_dt = left_join(binId_dt, filter_regions_dt, by = c("bin1_id" = "bin_id", "chr" ="chr"))
+  binId_dt = left_join(binId_dt, filter_regions_dt, by = c("bin2_id" = "bin_id", "chr" ="chr"))
+  binId_dt[is.na(include.x), include.x := TRUE]
+  binId_dt[is.na(include.y), include.y := TRUE]
+  
+  keep_filter_regions = binId_dt$include.x & binId_dt$include.y
+  df <- df[keep_filter_regions,]
+  
+  return(df)
 }
 
 
@@ -425,9 +420,10 @@ TSS_filter_iset <- function(iset, TSS_regions_path, resolution){
   TSS_regions_dt$include = rep(TRUE, length(TSS_regions_dt$chr))
   TSS_regions_dt = unique(TSS_regions_dt[,c("bin_id","include","chr")])
   
-  chrs <- elementMetadata(isets)$X
-  binIds <- anchorIds(isets, type="both")
-  binId_dt <- data.table(bin1_id = binIds$first, bin2_id=binIds$second, chrs=chrs) 
+  chrs <- elementMetadata(iset)$X
+  binIds <- anchors(iset, type="both")
+  binId_dt <- data.table(bin1_id = data.frame(binIds$first)$start, 
+                         bin2_id= data.frame(binIds$second)$start, chrs=chrs) 
   
   # Perform the join and filtering operation
   binId_dt = left_join(binId_dt, TSS_regions_dt, by = c("bin1_id" = "bin_id", "chrs" ="chr"))
@@ -436,9 +432,16 @@ TSS_filter_iset <- function(iset, TSS_regions_path, resolution){
   binId_dt[is.na(include.y), include.y := FALSE]
   
   keep_gene_transcript = binId_dt$include.x & binId_dt$include.y
-  isets <- isets[keep_gene_transcript,]
+  iset <- iset[keep_gene_transcript,]
 
-  return(isets)
+  return(iset)
+}
+
+diag_filter_iset <- function(iset){
+  binIds <- anchors(iset, type="both")
+  keep = data.frame(binIds$first)$start != data.frame(binIds$second)$start
+  iset = iset[keep,]
+  iset
 }
 
 ### TODO: coarsen_iset?
@@ -464,4 +467,45 @@ coarsen_iset <- function(isets, n_groups){
   # Remove the original columns
   isets = isets[, 1:(n_samples/group_size)]
   return(isets)
+}
+
+calc_iset_sparsity <- function(iset){
+  cnts = assays(iset)[[1]]
+  nz_cnts = sum(cnts != 0)
+  nz_cnts / (dim(cnts)[1] * dim(cnts)[2])
+}
+
+prep_isets <- function(dfs, filter_regions_path, experiment_sizes){
+  iset = make_iset(dfs)
+  iset = diag_filter_iset(iset)
+  max_es = experiment_sizes[length(experiment_sizes)]
+  iset = iset[,c(1:max_es, (dim(iset)[2]-max_es+1):dim(iset)[2])]
+  assayNames(iset) = 'counts'
+  iset = filter_regions_iset(iset, filter_regions_path, 100000)
+  keep <- (rowMeans(assay(iset)[,1:max_es]) > 0.1) | 
+    (rowMeans(assay(iset)[,(max_es+1):(2*max_es)]) > 0.1)
+  iset = iset[keep,]
+  isets = list()
+  for (es in experiment_sizes[1:(length(experiment_sizes)-1)]){
+    isets[[es]] = coarsen_iset(iset, es)
+  }
+  isets[[max_es]] = iset
+  isets
+}
+
+make_diffHiC_results <- function(iset, es){
+  y <- asDGEList(iset)
+  y <- normOffsets(y, se.out=TRUE) # normalization
+  group = factor(c(rep(1,es) , rep(2, es)))
+  design = model.matrix(~group)
+  y <- estimateDisp(y, design)
+  fit <- glmQLFit(y, design, robust=TRUE)
+  result <- glmQLFTest(fit)
+  adj.p <- p.adjust(result$table$PValue, method="BH")
+  useful.cols <- as.vector(outer(c("seqnames", "start", "end"), 1:2, paste0))
+  inter.frame <- as.data.frame(interactions(iset))[,useful.cols]
+  results.r <- data.frame(inter.frame, result$table, FDR=adj.p)
+  o.r <- order(results.r$PValue)
+  results.r = results.r[o.r,]
+  return(list("result" = results.r, "fit" = fit))
 }
