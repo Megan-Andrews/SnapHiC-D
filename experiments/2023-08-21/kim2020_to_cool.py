@@ -7,8 +7,8 @@ import os
 libraries_list = ["H1Esc-HFF.R1",  "H1Esc.R1",  "HFF-GM12878.R1",  "IMR90-HAP1.R1", "GM12878_IMR90.R1",  "H1Esc-HFF.R2",  "H1Esc.R2",  "HFF-GM12878.R2",  "IMR90-HAP1.R2"]
 kim2020_file_path = "/project/compbio-lab/scHi-C/Kim2020/"
 chrom_size_path = "../../ext/hg19.chrom.sizes"
-cool_directory = os.path.join(kim2020_file_path, "Kim2020_cool")
-os.mkdir(cool_directory)
+cool_directory = "/project/compbio-lab/scHi-C/Kim2020_cool/" #os.path.join(kim2020_file_path, "Kim2020_cool")
+#os.mkdir(cool_directory)
 
 def create_cooler(df, output_file):
     def get_chrom_offsets(bins_df):
@@ -38,11 +38,12 @@ def create_cooler(df, output_file):
                             ordered=False,
                             dtypes={'count': np.float64}) 
 
+
 def filter_matrices(file_path, output_file):
     columns = ["binId_1", "binId_2", "counts","normalized_counts", "1st_chr", "2nd_chr"]
     df = pd.read_csv(file_path, delimiter='\t', header=None)
     df.columns = columns
-    df = df[df["1st_chr"] == df["2nd_chr"]] # only include intra-chromosome pairs
+    df = df[df["1st_chr"] == df["2nd_3chr"]] # only include intra-chromosome pairs
     df["1st_chr"] = df["1st_chr"].apply(lambda x: x.split("_")[1])
     temp_df = df[df["binId_1"] != df["binId_2"]] # only count interactions more than 500kb apart
 
