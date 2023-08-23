@@ -70,12 +70,11 @@ for library in libraries_list:
         labels_directory = kim2020_file_path + "labels/" + library + ".labeled"
         cell_type_df = pd.read_csv(labels_directory, header=None, delimiter="\t")
         cell_type_df.columns = ["file_name", "cell_type"]
-        print(cell_type_df)
         
         # Iterate through all files in the directory
         for filename in os.listdir(directory):
             file_no = filename.split("_")[1]
-            cell_line = cell_type_df[cell_type_df["file_name"] == filename]["cell_type"]
+            cell_line = cell_type_df[cell_type_df["file_name"] == filename, "cell_type"].values[0]
             print(cell_line)
             cool_output_file = os.path.join(cool_directory, f"human_{file_no}_{cell_line}_{library}.cool")
             if os.path.isfile(os.path.join(directory, filename)):
