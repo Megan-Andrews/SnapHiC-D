@@ -28,7 +28,7 @@ def create_cooler(df, output_file):
         # Update binId_1 and binId_2 using .loc
         df.loc[mask, "binId_1"] += chrom_offsets[chr]
         df.loc[mask, "binId_2"] += chrom_offsets[chr]
-        
+
     data = pd.DataFrame({
             "bin1_id": df["binId_1"],
             "bin2_id": df["binId_2"],
@@ -75,10 +75,11 @@ for library in libraries_list:
         for filename in os.listdir(directory):
             file_no = filename.split("_")[1]
             cell_line = cell_type_df[cell_type_df["file_name"] == filename]["cell_type"]
-            cool_output_file = cool_directory + "/human_" + file_no + "_" + cell_line, "_" + library + ".cool"
+            cool_output_file = os.path.join(cool_directory, f"human_{file_no}_{cell_line}_{library}.cool")
             if os.path.isfile(os.path.join(directory, filename)):
                 # Perform an action on each file
                 print(f"File: {filename}")
+                print(f"Output file: {cool_output_file}")
                 filter_matrices(os.path.join(directory, filename), cool_output_file)
     else:
         print(f"Not a directory: {directory}")
