@@ -51,7 +51,7 @@ def filter_matrices(file_path, output_file):
     df["1st_chr"] = df["1st_chr"].apply(lambda x: x.split("_")[1])
     temp_df = df[df["binId_1"] != df["binId_2"]] # only count interactions more than 500kb apart
 
-    print(df.sort_values(by='1st_chr'))
+    print(df.groupby('1st_chr').head(1).sort_values(by='binId_1'))
     if temp_df["counts"].sum() > 2000:
         print("more than 2000 read pairs")
         create_cooler(df, output_file)
