@@ -43,7 +43,7 @@ def filter_matrices(file_path, output_file):
     columns = ["binId_1", "binId_2", "counts","normalized_counts", "1st_chr", "2nd_chr"]
     df = pd.read_csv(file_path, delimiter='\t', header=None)
     df.columns = columns
-    df = df[df["1st_chr"] == df["2nd_3chr"]] # only include intra-chromosome pairs
+    df = df[df["1st_chr"] == df["2nd_chr"]] # only include intra-chromosome pairs
     df["1st_chr"] = df["1st_chr"].apply(lambda x: x.split("_")[1])
     temp_df = df[df["binId_1"] != df["binId_2"]] # only count interactions more than 500kb apart
 
