@@ -75,7 +75,7 @@ for library in libraries_list:
             if os.path.isfile(os.path.join(directory, filename)):
                 # Perform an action on each file
                 print(f"File: {filename}")
-                filter_matrices(filename, cool_output_file)
+                filter_matrices(os.path.join(directory, filename), cool_output_file)
     else:
         print(f"Not a directory: {directory}")
 
