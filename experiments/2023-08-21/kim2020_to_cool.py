@@ -71,7 +71,7 @@ for library in libraries_list:
         for filename in os.listdir(directory):
             file_no = filename.split("_")[1]
             cell_line = cell_type_df[cell_type_df["file_name"] == filename]["cell_type"]
-            cool_output_file = os.path.join(cool_directory, "/human_", file_no, "_", cell_line, "_", library, ".cool")
+            cool_output_file = cool_directory + "/human_" + file_no + "_" + cell_line, "_" + library + ".cool"
             if os.path.isfile(os.path.join(directory, filename)):
                 # Perform an action on each file
                 print(f"File: {filename}")
