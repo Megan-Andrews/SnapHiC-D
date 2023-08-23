@@ -70,6 +70,7 @@ for library in libraries_list:
         labels_directory = kim2020_file_path + "labels/" + library + ".labeled"
         cell_type_df = pd.read_csv(labels_directory, header=None, delimiter="\t")
         cell_type_df.columns = ["file_name", "cell_type"]
+        print(cell_type_df)
         
         # Iterate through all files in the directory
         for filename in os.listdir(directory):
