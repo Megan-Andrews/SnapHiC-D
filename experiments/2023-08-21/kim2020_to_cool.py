@@ -74,13 +74,13 @@ for library in libraries_list:
             file_no = filename.split("_")[1]
             cell_line = cell_type_df.loc[cell_type_df["file_name"] == filename, "cell_type"].values[0]
             print(cell_line)
-            cool_output_file = os.path.join(cool_directory, f"human_{file_no}_{cell_line}_{library}.cool")
+            lib_name = library.replace("_","-")
+            cool_output_file = os.path.join(cool_directory, f"human_{file_no}_{cell_line}_{lib_name}.cool")
             if os.path.isfile(os.path.join(directory, filename)):
                 # Perform an action on each file
                 print(f"File: {filename}")
                 print(f"Output file: {cool_output_file}")
-                filter_matrices(os.path.join(directory, filename), cool_output_file)
-                break 
+                filter_matrices(os.path.join(directory, filename), cool_output_file) 
     else:
         print(f"Not a directory: {directory}")
 
