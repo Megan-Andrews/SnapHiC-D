@@ -22,9 +22,13 @@ def create_cooler(df, output_file):
     chrom_offsets = get_chrom_offsets(bins_df)
 
     for chr in chrom_sizes.index:
-        df[df["1st_chr"] == chr]["binId_1"] = df[df["1st_chr"] == chr]["binId_1"] + chrom_offsets[chr]
-        df[df["1st_chr"] == chr]["binId_2"] = df[df["1st_chr"] == chr]["binId_2"] + chrom_offsets[chr]
-
+        # Define a boolean mask for the condition
+        mask = df["1st_chr"] == chr
+        
+        # Update binId_1 and binId_2 using .loc
+        df.loc[mask, "binId_1"] += chrom_offsets[chr]
+        df.loc[mask, "binId_2"] += chrom_offsets[chr]
+        
     data = pd.DataFrame({
             "bin1_id": df["binId_1"],
             "bin2_id": df["binId_2"],
