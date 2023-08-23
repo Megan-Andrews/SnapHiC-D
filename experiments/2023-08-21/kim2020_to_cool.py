@@ -63,7 +63,7 @@ for library in libraries_list:
         # Perform an action, such as printing the directory name
         print(f"Directory: {directory}")
         print(library)
-        labels_directory = os.path.join(kim2020_file_path, "labels/", library, ".labeled")
+        labels_directory = kim2020_file_path + "labels/" + library + ".labeled"
         cell_type_df = pd.read_csv(labels_directory, header=None, delimiter="\t")
         cell_type_df.columns = ["file_name", "cell_type"]
         
