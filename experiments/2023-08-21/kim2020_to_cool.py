@@ -6,7 +6,7 @@ import os
 # read .matrix file
 libraries_list = ["H1Esc-HFF.R1",  "H1Esc.R1",  "HFF-GM12878.R1",  "IMR90-HAP1.R1", "GM12878_IMR90.R1",  "H1Esc-HFF.R2",  "H1Esc.R2",  "HFF-GM12878.R2",  "IMR90-HAP1.R2"]
 kim2020_file_path = "/project/compbio-lab/scHi-C/Kim2020/"
-chrom_size_path = "../../ext/hg19.chrom.sizes"
+chrom_size_path = "../../ext/hg19.chrom.sizes.ordered"
 cool_directory = os.path.join(kim2020_file_path, "Kim2020_cool")
 #os.mkdir(cool_directory)
 
@@ -17,9 +17,6 @@ def create_cooler(df, output_file):
     #     return chrom_offset
 
     chrom_sizes = pd.read_csv(chrom_size_path, sep='\t',index_col=0, header=None).squeeze(axis=1)
-    chrom_sizes = chrom_sizes[:24]
-    chr_order = ["chr" + str(i) for i in range(1, 23)] + ["chrX", "chrY"]
-    chrom_sizes = pd.Categorical(chrom_sizes, categories=chr_order, ordered=True)
     bins_df = cooler.binnify(chrom_sizes, 500000)
     # chrom_offsets = get_chrom_offsets(bins_df)
 
