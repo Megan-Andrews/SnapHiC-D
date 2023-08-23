@@ -65,8 +65,7 @@ for library in libraries_list:
     if os.path.isdir(directory):
         # Perform an action, such as printing the directory name
         print(f"Directory: {directory}")
-        print(library)
-        labels_directory = kim2020_file_path + "labels/" + library + ".labeled"
+        labels_directory = kim2020_file_path + "labels/" + library.replace("_", "-") + ".labeled"
         cell_type_df = pd.read_csv(labels_directory, header=None, delimiter="\t")
         cell_type_df.columns = ["file_name", "cell_type"]
         
