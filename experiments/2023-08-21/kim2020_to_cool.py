@@ -18,6 +18,8 @@ def create_cooler(df, output_file):
 
     chrom_sizes = pd.read_csv(chrom_size_path, sep='\t',index_col=0, header=None).squeeze(axis=1)
     chrom_sizes = chrom_sizes[:24]
+    chr_order = ["chr" + str(i) for i in range(1, 23)] + ["chrX", "chrY"]
+    chrom_sizes = pd.Categorical(chrom_sizes, categories=chr_order, ordered=True)
     bins_df = cooler.binnify(chrom_sizes, 500000)
     # chrom_offsets = get_chrom_offsets(bins_df)
 
@@ -51,7 +53,6 @@ def filter_matrices(file_path, output_file):
     df["1st_chr"] = df["1st_chr"].apply(lambda x: x.split("_")[1])
     temp_df = df[df["binId_1"] != df["binId_2"]] # only count interactions more than 500kb apart
 
-    print(df.groupby('1st_chr').head(1).sort_values(by='binId_1'))
     if temp_df["counts"].sum() > 2000:
         print("more than 2000 read pairs")
         create_cooler(df, output_file)
