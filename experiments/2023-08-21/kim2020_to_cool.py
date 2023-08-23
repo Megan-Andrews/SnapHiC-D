@@ -7,7 +7,7 @@ import os
 libraries_list = ["H1Esc-HFF.R1",  "H1Esc.R1",  "HFF-GM12878.R1",  "IMR90-HAP1.R1", "GM12878_IMR90.R1",  "H1Esc-HFF.R2",  "H1Esc.R2",  "HFF-GM12878.R2",  "IMR90-HAP1.R2"]
 kim2020_file_path = "/project/compbio-lab/scHi-C/Kim2020/"
 chrom_size_path = "../../ext/hg19.chrom.sizes"
-cool_directory = "/project/compbio-lab/scHi-C/Kim2020_cool/" #os.path.join(kim2020_file_path, "Kim2020_cool")
+cool_directory = os.path.join(kim2020_file_path, "Kim2020_cool")
 #os.mkdir(cool_directory)
 
 def create_cooler(df, output_file):
@@ -62,7 +62,7 @@ for library in libraries_list:
     if os.path.isdir(directory):
         # Perform an action, such as printing the directory name
         print(f"Directory: {directory}")
-        labels_directory = os.path.join(kim2020_file_path, "labels/", library, ".labeled")
+        labels_directory = os.path.join(kim2020_file_path, "labels/", library, "labeled")
         cell_type_df = pd.read_csv(labels_directory, header=None, delimiter="\t")
         cell_type_df.columns = ["file_name", "cell_type"]
         
