@@ -11,23 +11,23 @@ cool_directory = os.path.join(kim2020_file_path, "Kim2020_cool")
 #os.mkdir(cool_directory)
 
 def create_cooler(df, output_file):
-    def get_chrom_offsets(bins_df):
-        chrom_offset = {chrom: bins_df[bins_df['chrom'] == chrom].index[0]
-                        for chrom in bins_df['chrom'].cat.categories}
-        return chrom_offset
+    # def get_chrom_offsets(bins_df):
+    #     chrom_offset = {chrom: bins_df[bins_df['chrom'] == chrom].index[0]
+    #                     for chrom in bins_df['chrom'].cat.categories}
+    #     return chrom_offset
 
     chrom_sizes = pd.read_csv(chrom_size_path, sep='\t',index_col=0, header=None).squeeze(axis=1)
     chrom_sizes = chrom_sizes[:24]
     bins_df = cooler.binnify(chrom_sizes, 500000)
-    chrom_offsets = get_chrom_offsets(bins_df)
+    # chrom_offsets = get_chrom_offsets(bins_df)
 
-    for chr in chrom_sizes.index:
-        # Define a boolean mask for the condition
-        mask = df["1st_chr"] == chr
+    # for chr in chrom_sizes.index:
+    #     # Define a boolean mask for the condition
+    #     mask = df["1st_chr"] == chr
         
-        # Update binId_1 and binId_2 using .loc
-        df.loc[mask, "binId_1"] += chrom_offsets[chr]
-        df.loc[mask, "binId_2"] += chrom_offsets[chr]
+    #     # Update binId_1 and binId_2 using .loc
+    #     df.loc[mask, "binId_1"] += chrom_offsets[chr]
+    #     df.loc[mask, "binId_2"] += chrom_offsets[chr]
 
     data = pd.DataFrame({
             "bin1_id": df["binId_1"],
@@ -51,6 +51,7 @@ def filter_matrices(file_path, output_file):
     df["1st_chr"] = df["1st_chr"].apply(lambda x: x.split("_")[1])
     temp_df = df[df["binId_1"] != df["binId_2"]] # only count interactions more than 500kb apart
 
+    print(df.sort_values(by='1st_chr'))
     if temp_df["counts"].sum() > 2000:
         print("more than 2000 read pairs")
         create_cooler(df, output_file)
@@ -82,6 +83,7 @@ for library in libraries_list:
                 print(f"File: {filename}")
                 print(f"Output file: {cool_output_file}")
                 filter_matrices(os.path.join(directory, filename), cool_output_file)
+                break 
     else:
         print(f"Not a directory: {directory}")
 
