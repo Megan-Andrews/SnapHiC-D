@@ -52,9 +52,9 @@ def visualize_hic(coolfile, matrixfile, outputfile):
 # human_9963_HFF_H1Esc-HFF.R1.cool
 visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_9963_HFF_H1Esc-HFF.R1.cool",
               "/project/compbio-lab/scHi-C/Kim2020/H1Esc-HFF.R1/human_9963_TGGAGAGG-GCTAACGA_500000.matrix",
-              "~/SnapHiC-D/experiments/2023-08-21/test_visualizations/human_9963_HFF_H1Esc-HFF.R1.png")
+              "/home/maa160/SnapHiC-D/experiments/2023-08-21/test_visualizations/human_9963_HFF_H1Esc-HFF.R1.png")
 
 # human_9996_H1Esc_H1Esc.R2.cool
 visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_9996_H1Esc_H1Esc.R2.cool",
               "/project/compbio-lab/scHi-C/Kim2020/H1Esc.R2/human_9996_AAGCCGGT-CTTGGTTA_500000.matrix",
-              "~/SnapHiC-D/experiments/2023-08-21/test_visualizations/human_9996_H1Esc_H1Esc.R2.png")
+              "/home/maa160/SnapHiC-D/experiments/2023-08-21/test_visualizations/human_9996_H1Esc_H1Esc.R2.png")
