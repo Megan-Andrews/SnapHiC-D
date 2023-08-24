@@ -69,7 +69,7 @@ def visualize_hic(coolfile, matrixfile, outputfile):
     cbar2.set_label('Intensity')
 
      # Set y-axis ticks and labels to match the index
-    ticks = np.arange(get_chrom_offsets("chrX")-get_chrom_offsets("chr22"))
+    ticks = np.arange(chrom_offsets["chrX"]-chrom_offsets["chr22"])
     ax2.set_yticks(ticks)
     ax2.set_yticklabels(pivot_df.index)
     ax2.set_xticks(ticks)
