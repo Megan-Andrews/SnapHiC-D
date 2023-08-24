@@ -71,9 +71,9 @@ def visualize_hic(coolfile, matrixfile, outputfile):
      # Set y-axis ticks and labels to match the index
     ticks = np.arange(chrom_offsets["chrX"]-chrom_offsets["chr22"])
     ax2.set_yticks(ticks)
-    ax2.set_yticklabels(pivot_df.index)
+    # ax2.set_yticklabels(pivot_df.index)
     ax2.set_xticks(ticks)
-    ax2.set_xticklabels(pivot_df.columns)
+    # ax2.set_xticklabels(pivot_df.columns)
 
     # Adjust spacing between subplots
     plt.tight_layout()
