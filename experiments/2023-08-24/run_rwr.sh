@@ -19,5 +19,4 @@ upper_distance=2000000
 ############################################################################
 
 
-python ${SnapHiC_D_dir}/python/snapHiC_preprocessing_mpi.py -f $file_list --indir $input_dir -o $out_dir -r $bin_size -l $chr_lens --format $format --window-size $window_size --rp $rp --extension $extension --upper-distance $upper_distance
-
+python ${SnapHiC_D_dir}/python/snapHiC_preprocessing_mpi.py -f $file_list --indir $input_dir -o $output_dir -r $res -l $chr_lens --format $format --window-size $window_size --rp $rp --extension $extension --upper-distance $upper_distance
