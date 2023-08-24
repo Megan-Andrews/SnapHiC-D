@@ -17,6 +17,7 @@ def visualize_hic(coolfile, matrixfile, outputfile):
     matrix_df = pd.read_csv(matrixfile, delimiter='\t', header=None)
     matrix_df.columns = columns
     matrix_df = matrix_df[matrix_df["1st_chr"] == matrix_df["2nd_chr"]] # only include intra-chromosome pairs
+    matrix_df = matrix_df[matrix_df["1st_chr"] == "human_chr22"] # only include intra-chromosome pairs
     matrix_df = matrix_df[['binId_1', 'binId_2', 'counts']]
     pivot_df = matrix_df.pivot(index='binId_1', columns='binId_2', values='counts')
     pivot_df = pivot_df.fillna(0)
