@@ -38,7 +38,7 @@ def visualize_hic(coolfile, matrixfile, outputfile):
     matrix_df = matrix_df[['binId_1', 'binId_2', 'counts']]
     matrix_reflection = matrix_df.copy()
     matrix_reflection.columns = ['binId_2', 'binId_1', 'counts']
-    additional_row = pd.DataFrame([[0, 0, 0]])
+    additional_row = pd.DataFrame([[0, 0, 1]])
     additional_row.columns = ['binId_1', 'binId_2', 'counts']
     matrix_df = pd.concat([matrix_df, matrix_reflection, additional_row], ignore_index=True)
     matrix_df = matrix_df.drop_duplicates()
