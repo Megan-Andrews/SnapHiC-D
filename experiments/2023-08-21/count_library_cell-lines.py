@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 file_array = []
-for file in os.listdir("/projects/compbio-lab/scHi-C/Kim2020/Kim2020_cool"):
+for file in os.listdir("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool"):
     file_array.append(file)
 
 file_df = pd.DataFrame(file_array, columns=["file_name"])
