@@ -18,6 +18,8 @@ def visualize_hic(coolfile, matrixfile, outputfile):
     matrix_df.columns = columns
     matrix_df = matrix_df[matrix_df["1st_chr"] == matrix_df["2nd_chr"]] # only include intra-chromosome pairs
     matrix_df = matrix_df[['binId_1', 'binId_2', 'counts']]
+    pivot_df = matrix_df.pivot(index='binId_1', columns='binId_2', values='counts')
+    pivot_df = pivot_df.fillna(0)
 
     # Clear the plot
     plt.clf()
@@ -34,7 +36,7 @@ def visualize_hic(coolfile, matrixfile, outputfile):
 
     # Plot the matrix_df on the second subplot
     ax2 = axes[1]
-    ax2.imshow(matrix_df['counts'].values.reshape(cool_matrix.shape), cmap='coolwarm', origin="lower")
+    ax2.imshow(pivot_df, cmap='coolwarm', origin="lower")
     ax2.set_title("Matrix DataFrame")
     ax2.set_xlabel("Genomic Position")
     ax2.set_ylabel("Genomic Position")
@@ -47,5 +49,12 @@ def visualize_hic(coolfile, matrixfile, outputfile):
     # Save the figure
     plt.savefig(outputfile)
 
+# human_9963_HFF_H1Esc-HFF.R1.cool
+visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_9963_HFF_H1Esc-HFF.R1.cool",
+              "/project/compbio-lab/scHi-C/Kim2020/H1Esc-HFF.R1/human_9963_TGGAGAGG-GCTAACGA_500000.matrix",
+              "~/SnapHiC-D/experiments/2023-08-21/test_visualizations/human_9963_HFF_H1Esc-HFF.R1.png")
 
-visualize_hic("/project/compbio-lab/scHi-C/Lee2019/100kb_imputed_cool/181218_21yr_2_A1_AD004_L23_100kb_contacts_imputed.cool","/home/maa160/CompBioRA2023/Hi-C_Visualizations/181218_21yr_2_A1_AD004_L23_100kb_contacts_imputed.png")
+# human_9996_H1Esc_H1Esc.R2.cool
+visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_9996_H1Esc_H1Esc.R2.cool",
+              "/project/compbio-lab/scHi-C/Kim2020/H1Esc.R2/human_9996_AAGCCGGT-CTTGGTTA_500000.matrix",
+              "~/SnapHiC-D/experiments/2023-08-21/test_visualizations/human_9996_H1Esc_H1Esc.R2.png")
