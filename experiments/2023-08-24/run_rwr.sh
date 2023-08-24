@@ -1,8 +1,20 @@
 #!/bin/bash
+#SBATCH -J Kim_rwr_job
+#SBATCH --gres=gpu:0
+#SBATCH --mem-per-cpu=4G
+#SBATCH --cpus-per-task 1
+#SBATCH --ntasks 10
+#SBATCH --partition=long
+#SBATCH --output=Kim_rwr.out
+#SBATCH --nodelist=cs-venus-03
 
 ############################################################################
 ###                            User Variables                            ###
 ############################################################################
+
+
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate SnapEnv
 
 SnapHiC_D_dir="/home/maa160/SnapHiC-D"
 file_list="/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/file_list.txt"
@@ -19,4 +31,4 @@ upper_distance=2000000
 ############################################################################
 
 
-python ${SnapHiC_D_dir}/python/snapHiC_preprocessing_mpi.py -f $file_list --indir $input_dir -o $output_dir -r $res -l $chr_lens --format $format --window-size $window_size --rp $rp --extension $extension --upper-distance $upper_distance
+mpirun -n 10 python ${SnapHiC_D_dir}/python/snapHiC_preprocessing_mpi.py -f $file_list --indir $input_dir -o $output_dir -r $res -l $chr_lens --format $format --window-size $window_size --rp $rp --extension $extension --upper-distance $upper_distance
