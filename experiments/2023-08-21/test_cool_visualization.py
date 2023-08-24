@@ -24,23 +24,23 @@ def visualize_hic(coolfile, matrixfile, outputfile):
     # Clear the plot
     plt.clf()
 
+     # Create a subplot with 1 row and 2 columns
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
     ax1 = axes[0]
-    ax1.imshow(cool_matrix, cmap='coolwarm', origin="lower")
+    im1 = ax1.imshow(cool_matrix, cmap='coolwarm', origin="lower")
     ax1.set_title("Cool Matrix")
     ax1.set_xlabel("Genomic Position")
     ax1.set_ylabel("Genomic Position")
-    cbar1 = ax1.colorbar()
+    cbar1 = fig.colorbar(im1, ax=ax1)
     cbar1.set_label('Intensity')
 
-    # Plot the matrix_df on the second subplot
     ax2 = axes[1]
-    ax2.imshow(pivot_df, cmap='coolwarm', origin="lower")
+    im2 = ax2.imshow(pivot_df, cmap='coolwarm', origin="lower")
     ax2.set_title("Matrix DataFrame")
     ax2.set_xlabel("Genomic Position")
     ax2.set_ylabel("Genomic Position")
-    cbar2 = ax2.colorbar()
+    cbar2 = fig.colorbar(im2, ax=ax2)
     cbar2.set_label('Intensity')
 
     # Adjust spacing between subplots
