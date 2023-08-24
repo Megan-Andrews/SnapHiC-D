@@ -38,9 +38,11 @@ def visualize_hic(coolfile, matrixfile, outputfile):
     matrix_df = matrix_df[['binId_1', 'binId_2', 'counts']]
     matrix_reflection = matrix_df.copy()
     matrix_reflection.columns = ['binId_2', 'binId_1', 'counts']
-    additional_row = pd.DataFrame([[0, 0, 0]])
-    additional_row.columns = ['binId_1', 'binId_2', 'counts']
-    matrix_df = pd.concat([matrix_df, matrix_reflection, additional_row], ignore_index=True)
+    # additional_row = pd.DataFrame([[0, 0, 0]])
+    # additional_row.columns = ['binId_1', 'binId_2', 'counts']
+
+    chr_22_len = chrom_offsets["chrX"] - chrom_offsets["chr22"]
+    matrix_df = pd.concat([matrix_df, matrix_reflection], ignore_index=True)
     print(matrix_df)
     matrix_df = matrix_df.drop_duplicates()
     pivot_df = matrix_df.pivot(index='binId_1', columns='binId_2', values='counts')
