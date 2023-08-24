@@ -44,7 +44,7 @@ def visualize_hic(coolfile, coolRWRfile, outputfile):
     plt.savefig(outputfile)
 
 visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_10089_GM12878_HFF-GM12878.R2.cool",
-              "/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_10089_GM12878_HFF-GM12878.R2_rwr.cool",
+              "/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool_rwr/human_10089_GM12878_HFF-GM12878.R2_rwr.cool",
               "/home/maa160/SnapHiC-D/experiments/2023-08-24/test_visualizations/human_10089_GM12878_HFF-GM12878.R2_rwr.png")
 
 visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_9923_H1Esc_H1Esc.R1.cool",
