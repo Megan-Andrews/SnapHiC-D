@@ -43,6 +43,7 @@ def visualize_hic(coolfile, coolRWRfile, outputfile):
     # Save the figure
     plt.savefig(outputfile)
 
+"""
 visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_10089_GM12878_HFF-GM12878.R2.cool",
               "/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool_rwr/human_10089_GM12878_HFF-GM12878.R2_rwr.cool",
               "/home/maa160/SnapHiC-D/experiments/2023-08-24/test_visualizations/human_10089_GM12878_HFF-GM12878.R2_rwr.png")
@@ -62,4 +63,25 @@ visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_7940_GM128
 visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_8054_H1Esc_H1Esc.R1.cool",
                "/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool_rwr/human_8054_H1Esc_H1Esc.R1_rwr.cool",
               "/home/maa160/SnapHiC-D/experiments/2023-08-24/test_visualizations/human_8054_H1Esc_H1Esc.R1_rwr.png")
+"""
 
+# human_12294_H1Esc_H1Esc.R2_rwr.cool
+# human_12709_GM12878_HFF-GM12878.R2_rwr.cool
+# human_12724_H1Esc_H1Esc.R2_rwr.cool
+# human_13119_GM12878_HFF-GM12878.R2_rwr.cool
+
+visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_12294_H1Esc_H1Esc.R2.cool",
+              "/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool_rwr/human_12294_H1Esc_H1Esc.R2_rwr.cool",
+              "/home/maa160/SnapHiC-D/experiments/2023-08-24/test_visualizations/human_12294_H1Esc_H1Esc.R2_rwr.png")
+
+visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_12709_GM12878_HFF-GM12878.R2.cool",
+               "/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool_rwr/human_12709_GM12878_HFF-GM12878.R2_rwr.cool",
+              "/home/maa160/SnapHiC-D/experiments/2023-08-24/test_visualizations/human_12709_GM12878_HFF-GM12878.R2_rwr.png")
+
+visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_12724_H1Esc_H1Esc.R2.cool",
+              "/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool_rwr/human_12724_H1Esc_H1Esc.R2_rwr.cool",
+              "/home/maa160/SnapHiC-D/experiments/2023-08-24/test_visualizations/human_12724_H1Esc_H1Esc.R2_rwr.png")
+
+visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_13119_GM12878_HFF-GM12878.R2.cool",
+               "/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool_rwr/human_13119_GM12878_HFF-GM12878.R2_rwr.cool",
+              "/home/maa160/SnapHiC-D/experiments/2023-08-24/test_visualizations/human_13119_GM12878_HFF-GM12878.R2_rwr.png")
