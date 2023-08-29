@@ -106,7 +106,7 @@ def process_cell(filepath, format, extension, output_dir, resolution, chromosome
     return
 
 
-def rwr(edges, chrom_len, resolution, window_size, step_size, distance_threshold, rp):
+def rwr(edges, chrom_len, resolution, window_size, step_size, keep_short_range, distance_threshold, rp):
 
     edges.columns = ['bin1_id', 'bin2_id', 'count']
     valid_bins = np.unique(list(edges['bin1_id'].values) + list(edges['bin2_id'].values))
@@ -126,7 +126,8 @@ def rwr(edges, chrom_len, resolution, window_size, step_size, distance_threshold
         g = get_stochastic_matrix_from_edgelist(window_edges)
         window_edges_imp = solve_rwr_iterative(g, rp)
         window_edges_imp = window_edges_imp[(window_edges_imp['i'] + window_edges_imp['j'] > ss) & (window_edges_imp['i'] + window_edges_imp['j'] < ws + ss)]
-        window_edges_imp = window_edges_imp[(window_edges_imp['j'] - window_edges_imp['i'] <= distance_threshold)]
+        if keep_short_range:
+            window_edges_imp = window_edges_imp[(window_edges_imp['j'] - window_edges_imp['i'] <= distance_threshold)]
         window_edges_imp['i'] += window_start
         window_edges_imp['j'] += window_start
         window_edges_imp.columns = ['bin1_id', 'bin2_id', 'count']
@@ -226,6 +227,8 @@ def create_parser():
     parser.add_argument('--chrom-columns', action = 'store', required = False, nargs = 2, type = int, help = 'two integer column numbers for chromosomes')
     parser.add_argument('--pos-columns', action = 'store', required = False, nargs = 2, type = int, help = 'two integer column numbers for positions')
     parser.add_argument('--extension', action = 'store', required = True, help = 'extension of input files like .cool and .txt.gz')
+    parser.add_argument('--keep-short-range', action = 'store_true', default = False, \
+                        help = 'if set, only saves short range interactions within upper distance', required = False)
     parser.add_argument('--upper-distance', action = 'store', default = 2000000, type = int, help = 'maximum distance between bin pairs to store')
 
     return parser
@@ -233,3 +236,4 @@ def create_parser():
 
 if __name__ == "__main__":
     main()
+
