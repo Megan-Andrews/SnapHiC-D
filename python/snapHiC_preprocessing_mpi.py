@@ -56,24 +56,11 @@ def main():
     print('{} tasks assigned to rank {}'.format(len(task_filepaths), mpi_rank))
 
     for filepath in task_filepaths:
-        print("file path: ", filepath)
-        print("format: ", args.format)
-        print("extension: ", args.extension)
-        print("output_dir: ", args.output_dir)
-        print("resolution: ", args.resolution)
-        print("chromosome_lengths: ", chromosome_lengths)
-        print("chrom_columns: ", args.chrom_columns)
-        print("pos_columns: ", args.pos_columns)
-        print("window_size: ", window_size)
-        print("step_size: ", step_size)
-        print("upper_distance: ", args.upper_distance)
-        print("rp: ", args.rp)
-        
-        process_cell(filepath, args.format, args.extension, args.output_dir, args.resolution, chromosome_lengths, args.chrom_columns, args.pos_columns, window_size, step_size, args.upper_distance, args.rp)
+        process_cell(filepath, args.format, args.extension, args.output_dir, args.resolution, chromosome_lengths, args.chrom_columns, args.pos_columns, window_size, step_size, args.keep_short_range, args.upper_distance, args.rp)
     mpi_comm.barrier()
 
 
-def process_cell(filepath, format, extension, output_dir, resolution, chromosome_lengths, chrom_columns, pos_columns, window_size, step_size, upper_distance, rp):
+def process_cell(filepath, format, extension, output_dir, resolution, chromosome_lengths, chrom_columns, pos_columns, window_size, step_size, keep_short_range, upper_distance, rp):
 
     reg = r"(?P<fname>.*)(%s)" % extension
     filename = re.match(reg, os.path.basename(filepath)).groupdict()['fname']
@@ -91,7 +78,7 @@ def process_cell(filepath, format, extension, output_dir, resolution, chromosome
             edgelist.loc[:,['bin1_id', 'bin2_id']] -= c.offset(chrom)
             edgelist.loc[:,['bin1_id', 'bin2_id']] = (edgelist.loc[:,['bin1_id', 'bin2_id']]/coarsening_ratio).astype(int)
             edgelist = edgelist.groupby(['bin1_id','bin2_id']).agg({'count': 'sum'}).reset_index()
-            imp_edgelist = rwr(edgelist, chromosome_lengths[chrom], resolution, window_size, step_size, upper_distance, rp)
+            imp_edgelist = rwr(edgelist, chromosome_lengths[chrom], resolution, window_size, step_size, keep_short_range ,upper_distance, rp)
             imp_edgelist.iloc[:,[0,1]] += offset[chrom]
             all_imp_edgelist = pd.concat([all_imp_edgelist, imp_edgelist], axis = 0)
 
