@@ -27,7 +27,7 @@ format="cooler"
 window_size=10000000
 rp=0.05
 extension=".cool"
-keep-short-range=false
+keepShortRange=false
 upper_distance=40000000
 
 ############################################################################
