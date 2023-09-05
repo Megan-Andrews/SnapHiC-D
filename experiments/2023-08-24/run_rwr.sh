@@ -18,7 +18,7 @@ source ~/miniconda3/etc/profile.d/conda.sh
 conda activate SnapEnv
 
 SnapHiC_D_dir="/home/maa160/SnapHiC-D"
-file_list="/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/file_list.txt"
+file_list="/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/file_list_test.txt"
 input_dir="/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool"
 output_dir="/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool_rwr"
 res=500000
