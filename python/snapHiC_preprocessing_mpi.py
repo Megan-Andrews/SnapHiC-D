@@ -56,6 +56,19 @@ def main():
     print('{} tasks assigned to rank {}'.format(len(task_filepaths), mpi_rank))
 
     for filepath in task_filepaths:
+        print("file path: ", filepath)
+        print("format: ", args.format)
+        print("extension: ", args.extension)
+        print("output_dir: ", args.output_dir)
+        print("resolution: ", args.resolution)
+        print("chromosome_lengths: ", chromosome_lengths)
+        print("chrom_columns: ", args.chrom_columns)
+        print("pos_columns: ", args.pos_columns)
+        print("window_size: ", window_size)
+        print("step_size: ", step_size)
+        print("upper_distance: ", args.upper_distance)
+        print("rp: ", args.rp)
+        
         process_cell(filepath, args.format, args.extension, args.output_dir, args.resolution, chromosome_lengths, args.chrom_columns, args.pos_columns, window_size, step_size, args.upper_distance, args.rp)
     mpi_comm.barrier()
 
