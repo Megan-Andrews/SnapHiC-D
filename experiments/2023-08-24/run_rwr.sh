@@ -27,9 +27,10 @@ format="cooler"
 window_size=10000000
 rp=0.05
 extension=".cool"
+keep-short-range=false
 upper_distance=40000000
 
 ############################################################################
 
 
-mpirun -n 10 python ${SnapHiC_D_dir}/python/snapHiC_preprocessing_mpi.py -f $file_list --indir $input_dir -o $output_dir -r $res -l $chr_lens --format $format --window-size $window_size --rp $rp --extension $extension --upper-distance $upper_distance
+mpirun -n 10 python ${SnapHiC_D_dir}/python/snapHiC_preprocessing_mpi.py -f $file_list --indir $input_dir -o $output_dir -r $res -l $chr_lens --format $format --window-size $window_size --rp $rp --extension $extension --upper-distance $upper_distance --keep-short-range $keepShortRange
