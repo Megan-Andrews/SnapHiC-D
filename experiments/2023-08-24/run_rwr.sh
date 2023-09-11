@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 #SBATCH -J Kim_rwr_job
 #SBATCH --gres=gpu:0
 #SBATCH --time=1-00:00
@@ -13,9 +13,8 @@
 ###                            User Variables                            ###
 ############################################################################
 
-
 source ~/miniconda3/etc/profile.d/conda.sh
-conda activate SnapEnv
+conda activate CoolEnv
 
 SnapHiC_D_dir="/home/maa160/SnapHiC-D"
 file_list="/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/file_list_test.txt"
