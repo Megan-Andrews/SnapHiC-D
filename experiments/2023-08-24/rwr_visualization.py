@@ -69,19 +69,21 @@ visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_8054_H1Esc
 # human_12709_GM12878_HFF-GM12878.R2_rwr.cool
 # human_12724_H1Esc_H1Esc.R2_rwr.cool
 # human_13119_GM12878_HFF-GM12878.R2_rwr.cool
+#human_10089_GM12878_HFF-GM12878.R2_rwr.cool  human_23899_GM12878_HFF-GM12878.R2_rwr.cool  human_7438_H1Esc_H1Esc.R2_rwr.cool                                              
+#human_10359_GM12878_HFF-GM12878.R1_rwr.cool  human_28561_HFF_HFF-GM12878.R2_rwr.cool      human_7940_GM12878_HFF-GM12878.R2_rwr.cool   
 
-visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_12294_H1Esc_H1Esc.R2.cool",
-              "/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool_rwr/human_12294_H1Esc_H1Esc.R2_rwr.cool",
-              "/home/maa160/SnapHiC-D/experiments/2023-08-24/test_visualizations/human_12294_H1Esc_H1Esc.R2_rwr.png")
+visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_10089_GM12878_HFF-GM12878.R2.cool",
+              "/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool_rwr/human_10089_GM12878_HFF-GM12878.R2_rwr.cool",
+              "/home/maa160/SnapHiC-D/experiments/2023-08-24/test_visualizations/human_10089_GM12878_HFF-GM12878.R2_rwr.png")
 
-visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_12709_GM12878_HFF-GM12878.R2.cool",
-               "/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool_rwr/human_12709_GM12878_HFF-GM12878.R2_rwr.cool",
-              "/home/maa160/SnapHiC-D/experiments/2023-08-24/test_visualizations/human_12709_GM12878_HFF-GM12878.R2_rwr.png")
+#visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_12709_GM12878_HFF-GM12878.R2.cool",
+#               "/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool_rwr/human_12709_GM12878_HFF-GM12878.R2_rwr.cool",
+#              "/home/maa160/SnapHiC-D/experiments/2023-08-24/test_visualizations/human_12709_GM12878_HFF-GM12878.R2_rwr.png")
 
-visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_12724_H1Esc_H1Esc.R2.cool",
-              "/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool_rwr/human_12724_H1Esc_H1Esc.R2_rwr.cool",
-              "/home/maa160/SnapHiC-D/experiments/2023-08-24/test_visualizations/human_12724_H1Esc_H1Esc.R2_rwr.png")
+#visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_12724_H1Esc_H1Esc.R2.cool",
+#              "/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool_rwr/human_12724_H1Esc_H1Esc.R2_rwr.cool",
+#              "/home/maa160/SnapHiC-D/experiments/2023-08-24/test_visualizations/human_12724_H1Esc_H1Esc.R2_rwr.png")
 
-visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_13119_GM12878_HFF-GM12878.R2.cool",
-               "/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool_rwr/human_13119_GM12878_HFF-GM12878.R2_rwr.cool",
-              "/home/maa160/SnapHiC-D/experiments/2023-08-24/test_visualizations/human_13119_GM12878_HFF-GM12878.R2_rwr.png")
+#visualize_hic("/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool/human_13119_GM12878_HFF-GM12878.R2.cool",
+#               "/project/compbio-lab/scHi-C/Kim2020/Kim2020_cool_rwr/human_13119_GM12878_HFF-GM12878.R2_rwr.cool",
+#              "/home/maa160/SnapHiC-D/experiments/2023-08-24/test_visualizations/human_13119_GM12878_HFF-GM12878.R2_rwr.png")
