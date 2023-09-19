@@ -7,9 +7,9 @@ def select_random_unique_pairs(list1, list2, n):
     while len(unique_pairs) < n:
         c1 = random.choice(list1)
         c2 = random.choice(list2)
-        if c1 == c2:
+        if c1 == c2 or (random.choice(list1), random.choice(list2)) in unique_pairs:
             continue
-        pair = set((random.choice(list1), random.choice(list2)))
+        pair = (random.choice(list1), random.choice(list2))
         unique_pairs.add(pair)
     return list(unique_pairs)
 
