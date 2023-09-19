@@ -23,8 +23,7 @@ def write_file_pairs(pairs, output_file):
 input_file1 = 'HFF_files.txt'  # Replace with your first input file path
 input_file2 = 'GM12878_files.txt'  # Replace with your second input file path
 
-# Output file path for randomly selected unique pairs
-output_file = 'GM12878_HFF_selected_pairs.txt'  # Replace with your desired output file path
+
 
 # Read the input file paths into lists
 with open(input_file1, 'r') as file:
@@ -37,6 +36,19 @@ with open(input_file2, 'r') as file:
 random_pairs = select_random_unique_pairs(file_paths1, file_paths2, 100)
 
 # Write the selected pairs to the output file
-write_file_pairs(random_pairs, output_file)
+write_file_pairs(random_pairs, 'GM12878_HFF_selected_pairs.txt')
+
+# Randomly select 100 unique pairs of files
+random_pairs = select_random_unique_pairs(file_paths1, file_paths1, 100)
+
+# Write the selected pairs to the output file
+write_file_pairs(random_pairs, 'HFF_selected_pairs.txt')
+
+# Randomly select 100 unique pairs of files
+random_pairs = select_random_unique_pairs(file_paths2, file_paths2, 100)
+
+# Write the selected pairs to the output file
+write_file_pairs(random_pairs, "'GM12878_selected_pairs.txt'")
+
 
 print("Random unique pair selection and writing completed.")
