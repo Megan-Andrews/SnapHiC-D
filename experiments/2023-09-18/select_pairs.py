@@ -48,7 +48,7 @@ write_file_pairs(random_pairs, 'HFF_selected_pairs.txt')
 random_pairs = select_random_unique_pairs(file_paths2, file_paths2, 100)
 
 # Write the selected pairs to the output file
-write_file_pairs(random_pairs, "'GM12878_selected_pairs.txt'")
+write_file_pairs(random_pairs, "GM12878_selected_pairs.txt")
 
 
 print("Random unique pair selection and writing completed.")
