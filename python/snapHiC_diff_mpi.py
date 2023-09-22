@@ -11,6 +11,7 @@ import qnorm
 from scipy import stats
 import statsmodels.stats.multitest as multi
 from mpi4py import MPI
+from random import sample
 
 FDR_th = 0.05
 
@@ -23,21 +24,51 @@ def main():
     mpi_size = mpi_comm.Get_size()
     mpi_rank = mpi_comm.Get_rank()
 
+    if args.downsample:
+        if getattr(args, 'samplesize') == None:
+            raise ValueError('sample size should be specified if downsample is True.')
+        
     A_cools = read_cools(args, 'indir_A', 'filelist_A')
     B_cools = read_cools(args, 'indir_B', 'filelist_B')
 
+    
+    if args.max_distance_th:
+        if getattr(args, 'max_distance') == None:
+            raise ValueError('max distance should be specified if max_distance_th is True.')
+
+    
     if not os.path.exists(args.output_dir):
         os.mkdir(args.output_dir)
 
     chromosome_lengths = read_chrom_lens(args.chrom_lens)
     chrom_tasks = balanced_split(list(chromosome_lengths.keys()), mpi_size)
     my_chroms = chrom_tasks[mpi_rank]
+    
+    print('number of chromosomes: {}'.format(len(chromosome_lengths.keys())))
+    if args.max_distance_th:
+        print('number of gaps: {}'.format(int((args.max_distance - args.min_distance)/args.resolution) + 1))
+    else:
+        print('number of gaps: no threshold.')
+    print('size of populations A and B: {}, {}.'.format(len(A_cools), len(B_cools)))
+    
 
     for chrom in my_chroms:
         print('rank {} is making candidates df for chromosome {}'.format(mpi_rank, chrom))
         candidates_outfile_path = os.path.join(args.output_dir, '{}_candidates.txt'.format(chrom))
         if not os.path.exists(candidates_outfile_path):
-            candidates = make_candidates(A_cools, B_cools, chrom, args.resolution, args.filter_regions, args.TSS_regions, min_distance = args.min_distance, max_distance = args.max_distance)
+            if args.max_distance_th:
+                candidates = make_candidates(A_cools, B_cools, chrom, args.resolution, 
+                                             args.filter_regions, 
+                                             args.filter_TSS, args.TSS_regions, 
+                                             min_distance = args.min_distance, 
+                                             max_distance = args.max_distance)
+            else:
+                candidates = make_candidates(A_cools, B_cools, chrom, args.resolution, 
+                                             args.filter_regions, 
+                                             args.filter_TSS, args.TSS_regions, 
+                                             min_distance = args.min_distance, 
+                                             max_distance = chromosome_lengths[chrom])
+                
             candidates.to_csv(candidates_outfile_path, sep = "\t", index = False)
         else:
             print('candidates for chromosome {} exists.'.format(chrom))
@@ -55,7 +86,9 @@ def main():
             gaps = np.sort(gaps)
             for g in gaps:
                 gap_candidates = candidates[candidates['bin2_id'] - candidates['bin1_id']==g].copy()
-                gap_candidates.fillna(gap_candidates.min(), inplace=True)
+                #gap_candidates.fillna(gap_candidates.min(), inplace=True)
+                # it should be changed if normalization method outputs negative values
+                gap_candidates.fillna(0, inplace=True)
                 if result_table.empty:
                     result_table = get_result_table(gap_candidates, groups, args.resolution, FDR_th, chrom)
                 else:
@@ -70,10 +103,15 @@ def read_cools(args, dir_key, filelist_key):
         raise ValueError("One of " + dir_key + " or " + filelist_key + " should be set.")
     elif getattr(args, dir_key) != None:
         dir_path = getattr(args, dir_key)
-        for coolname in os.listdir(dir_path):
+        coolnames = os.listdir(dir_path)
+        if args.downsample:
+            coolnames = sample(coolnames, args.samplesize)
+        for coolname in coolnames:
             cools.append(cooler.Cooler(os.path.join(dir_path, coolname)))
     else:
         coollist = pd.read_csv(getattr(args, filelist_key), header = None)[0].values
+        if args.downsample:
+            coollist = sample(list(coollist), args.samplesize)
         for coolpath in coollist:
             cools.append(cooler.Cooler(coolpath))
     return cools
@@ -156,6 +194,7 @@ def get_ID(CHR, BINSIZE, filter_regions_filepath, TSS_regions_filepath):
 
     return b_ID, gID
 
+'''
 def make_candidates(A_cools, B_cools, chrom, resolution, filter_regions_filepath, TSS_regions_filepath, min_distance, max_distance):
 
     b_id, g_id = get_ID(chrom, resolution, filter_regions_filepath, TSS_regions_filepath)
@@ -170,26 +209,55 @@ def make_candidates(A_cools, B_cools, chrom, resolution, filter_regions_filepath
             all_df = pd.merge(all_df, norm_df[['bin1_id','bin2_id','norm_count']], on = ['bin1_id','bin2_id'], how='outer')
     all_df.columns = ['bin1_id','bin2_id'] + ['cell{}'.format(i) for i in np.arange(1,all_df.shape[1]-1)]
     return all_df
-# todo: add value filtering to make_candidates
-def get_result_table(candidates, groups, resolution, fdr_t, chrom):
+'''
 
-    A_scores = candidates.iloc[:,2:].iloc[:, np.where(groups=='A')[0]]
-    B_scores = candidates.iloc[:,2:].iloc[:, np.where(groups=='B')[0]]
-    num_A, num_B = np.where(groups=='A')[0].shape[0], np.where(groups=='B')[0].shape[0]
-    sigA = np.count_nonzero(A_scores > 1.96, axis=1) > num_A*.1
-    sigB = np.count_nonzero(B_scores > 1.96, axis=1) > num_B*.1
-    sig = np.array([a or b for a, b in zip(sigA,sigB)]).astype(int)
-    candidates = pd.concat([candidates.iloc[:,:2], A_scores, B_scores], axis = 1)[sig==1]
+# making candidates with raw count without filtering based on z-scores because it causes 
+# candidates to be from a specific set of genomic bins if positional bias exists
+
+def make_candidates(A_cools, B_cools, chrom, resolution, filter_regions_filepath, filter_TSS, TSS_regions_filepath, min_distance, max_distance):
+
+    b_id, g_id = get_ID(chrom, resolution, filter_regions_filepath, TSS_regions_filepath)
+    all_df = pd.DataFrame()
+    min_gap, max_gap = int(min_distance/resolution), int(max_distance/resolution)
+    for c in tqdm(A_cools+B_cools):
+        df = c.matrix(balance=False, as_pixels=True).fetch(chrom)
+        df[['bin1_id','bin2_id']] = df[['bin1_id','bin2_id']] - c.offset(chrom)
+        df['gap'] = df['bin2_id'] - df['bin1_id']
+        df = df[(df['gap']>=min_gap) & (df['gap']<=max_gap)]
+        df = df[(~df['bin1_id'].isin(b_id)) & (~df['bin2_id'].isin(b_id))]
+        if filter_TSS:
+            df = df[(df['bin1_id'].isin(g_id)) | (df['bin2_id'].isin(g_id))]
+        if all_df.empty:
+            all_df = df[['bin1_id','bin2_id','count']]
+        else:
+            all_df = pd.merge(all_df, df[['bin1_id','bin2_id','count']], on = ['bin1_id','bin2_id'], how='outer')
+    all_df.columns = ['bin1_id','bin2_id'] + ['cell{}'.format(i) for i in np.arange(1,all_df.shape[1]-1)]
+    return all_df
+
+
+def get_result_table(candidates, groups, resolution, fdr_t, chrom):
+    
+    # remove filtering based on z-score
+    #A_scores = candidates.iloc[:,2:].iloc[:, np.where(groups=='A')[0]]
+    #B_scores = candidates.iloc[:,2:].iloc[:, np.where(groups=='B')[0]]
+    #num_A, num_B = np.where(groups=='A')[0].shape[0], np.where(groups=='B')[0].shape[0]
+    #sigA = np.count_nonzero(A_scores > 1.96, axis=1) > num_A*.1
+    #sigB = np.count_nonzero(B_scores > 1.96, axis=1) > num_B*.1
+    #sig = np.array([a or b for a, b in zip(sigA,sigB)]).astype(int)
+    #candidates = pd.concat([candidates.iloc[:,:2], A_scores, B_scores], axis = 1)[sig==1]
     candidates_scores = candidates.iloc[:,2:]
     candidates_scores = qnorm.quantile_normalize(candidates_scores, axis = 1)
     A_scores = candidates_scores.iloc[:, np.where(groups=='A')[0]]
     B_scores = candidates_scores.iloc[:, np.where(groups=='B')[0]]
-    if all(np.var(A_scores, ddof=1, axis=0) > 0) is True and all(np.var(B_scores, ddof=1, axis=0) > 0) is True:
+    A_scores = A_scores.iloc[:,np.where(A_scores.var(axis=0)!=0)[0]]
+    B_scores = B_scores.iloc[:,np.where(B_scores.var(axis=0)!=0)[0]]
+    #if all(np.var(A_scores, ddof=1, axis=0) > 0) is True and all(np.var(B_scores, ddof=1, axis=0) > 0) is True:
+    if A_scores.shape[0] > 0 and A_scores.shape[1] > 2 and B_scores.shape[0] > 0 and B_scores.shape[1] > 2:
         t_stat, p_val = stats.ttest_ind(A_scores, B_scores, axis=1, equal_var=False)
         out = pd.DataFrame(columns=['chrom', 'bin1_id','bin2_id', 'mean.A','mean.B', 'Tstat', 'Ttest.Pvalue'])
         out['chrom'] = [chrom]* candidates_scores.shape[0]
         out[['bin1_id','bin2_id']] = np.array(candidates.iloc[:,:2]*resolution)
-        out['mean.A'] = np.array(np.mean(A_scores, axis=1)) # should we save mean of quantile-normalized scores?
+        out['mean.A'] = np.array(np.mean(A_scores, axis=1)) 
         out['mean.B'] = np.array(np.mean(B_scores, axis=1))
         out['Tstat'] = t_stat
         out['Ttest.Pvalue'] = p_val
@@ -211,13 +279,16 @@ def create_parser():
     parser.add_argument('--indir-B', action = 'store', required = False, \
                         help = 'path of the folder including imputed cools for the second cell type')
     parser.add_argument('--filelist-B', action = 'store', required = False, help = 'path of a file including coolpaths for the second cell type')
-
+    parser.add_argument('--downsample', action = 'store_true', default = False)
+    parser.add_argument('--samplesize', action = 'store', required = False, type = int, help = 'size of downsampled population.')
     parser.add_argument('-o', '--output-dir', action = 'store', required = True, help = 'output directory to save candidate data frames for all chromosomes and results')
     parser.add_argument('-r', '--resolution', action = 'store', required = True, type = int, help = "resolution of contact maps")
     parser.add_argument('--min-distance', action = 'store', required = True, type = int, help = "minimum distance between loop anchors")
-    parser.add_argument('--max-distance', action = 'store', required = True, type = int, help = "maximum distance between loop anchors")
+    parser.add_argument('--max-distance-th', action = 'store_true', default = False, help = 'whether to have max distance threshold or not.')
+    parser.add_argument('--max-distance', action = 'store', required = False, type = int, help = "maximum distance between loop anchors")
     parser.add_argument('--chrom-lens', action = 'store', required = True, help = 'path to the file including chromosome lengths')
     parser.add_argument('--filter-regions', action = 'store', required = True, help = 'path to the file including filtered regions')
+    parser.add_argument('--filter-TSS', action = 'store_true', default = False, help = 'whether only consider candidates with anchor including TSS or not.')
     parser.add_argument('--TSS-regions', action = 'store', required = True, help = 'path to the file including TSS regions')
 
     return parser
