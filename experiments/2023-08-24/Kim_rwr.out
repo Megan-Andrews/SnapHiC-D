@@ -1,0 +1,2 @@
+Error: node list format not recognized. Try using '-hosts=<hostnames>'.
+/var/lib/slurm-llnl/slurmd/job60344/slurm_script: line 34: 32721 Aborted                 mpirun -n 10 python ${SnapHiC_D_dir}/python/snapHiC_preprocessing_mpi.py -f $file_list --indir $input_dir -o $output_dir -r $res -l $chr_lens --format $format --window-size $window_size --rp $rp --extension $extension --upper-distance $upper_distance
