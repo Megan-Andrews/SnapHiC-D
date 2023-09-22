@@ -47,7 +47,7 @@ def main():
 
     tasks = balanced_split(file_paths, mpi_size)
     task_filepaths = tasks[mpi_rank]
-    print(task_filepaths)
+    #print(task_filepaths)
     if (mpi_rank == 0) & (not os.path.exists(args.output_dir)):
         os.mkdir(args.output_dir)
     mpi_comm.barrier()
@@ -56,11 +56,11 @@ def main():
     print('{} tasks assigned to rank {}'.format(len(task_filepaths), mpi_rank))
 
     for filepath in task_filepaths:
-        process_cell(filepath, args.format, args.extension, args.output_dir, args.resolution, chromosome_lengths, args.chrom_columns, args.pos_columns, window_size, step_size, args.upper_distance, args.rp)
+        process_cell(filepath, args.format, args.extension, args.output_dir, args.resolution, chromosome_lengths, args.chrom_columns, args.pos_columns, args.partial, window_size, step_size, args.keep_short_range, args.upper_distance, args.rp)
     mpi_comm.barrier()
 
 
-def process_cell(filepath, format, extension, output_dir, resolution, chromosome_lengths, chrom_columns, pos_columns, window_size, step_size, upper_distance, rp):
+def process_cell(filepath, format, extension, output_dir, resolution, chromosome_lengths, chrom_columns, pos_columns, partial, window_size, step_size, keep_short_range, upper_distance, rp):
 
     reg = r"(?P<fname>.*)(%s)" % extension
     filename = re.match(reg, os.path.basename(filepath)).groupdict()['fname']
@@ -78,7 +78,7 @@ def process_cell(filepath, format, extension, output_dir, resolution, chromosome
             edgelist.loc[:,['bin1_id', 'bin2_id']] -= c.offset(chrom)
             edgelist.loc[:,['bin1_id', 'bin2_id']] = (edgelist.loc[:,['bin1_id', 'bin2_id']]/coarsening_ratio).astype(int)
             edgelist = edgelist.groupby(['bin1_id','bin2_id']).agg({'count': 'sum'}).reset_index()
-            imp_edgelist = rwr(edgelist, chromosome_lengths[chrom], resolution, window_size, step_size, upper_distance, rp)
+            imp_edgelist = rwr(edgelist, chromosome_lengths[chrom], resolution, partial, window_size, step_size, keep_short_range, upper_distance, rp)
             imp_edgelist.iloc[:,[0,1]] += offset[chrom]
             all_imp_edgelist = pd.concat([all_imp_edgelist, imp_edgelist], axis = 0)
 
@@ -90,7 +90,7 @@ def process_cell(filepath, format, extension, output_dir, resolution, chromosome
             edgelist = (edgelist/resolution).astype(int)
             edgelist.columns = ['bin1_id', 'bin2_id']
             edgelist = edgelist.groupby(['bin1_id','bin2_id']).size().to_frame('count').reset_index()
-            imp_edgelist = rwr(edgelist, chromosome_lengths[chrom], resolution, window_size, step_size, upper_distance, rp)
+            imp_edgelist = rwr(edgelist, chromosome_lengths[chrom], resolution, partial, window_size, step_size, keep_short_range, upper_distance, rp)
             imp_edgelist.iloc[:,[0,1]] += offset[chrom]
             all_imp_edgelist = pd.concat([all_imp_edgelist, imp_edgelist], axis = 0)
 
@@ -106,7 +106,7 @@ def process_cell(filepath, format, extension, output_dir, resolution, chromosome
     return
 
 
-def rwr(edges, chrom_len, resolution, window_size, step_size, distance_threshold, rp):
+def rwr(edges, chrom_len, resolution, partial, window_size, step_size, keep_short_range, distance_threshold, rp):
 
     edges.columns = ['bin1_id', 'bin2_id', 'count']
     valid_bins = np.unique(list(edges['bin1_id'].values) + list(edges['bin2_id'].values))
@@ -115,7 +115,12 @@ def rwr(edges, chrom_len, resolution, window_size, step_size, distance_threshold
     distance_threshold = int(distance_threshold/resolution)
     #r = coo_matrix(((0,), ((0,), (0,))), shape = (chrom_size,chrom_size)).todense()
     rwr_edges = pd.DataFrame()
-    for window_start in tqdm(range(0, chrom_size, ss)):
+    if partial:
+        window_starts = range(0, chrom_size, ss)
+    else:
+        window_starts = [0]
+        ws = chrom_len
+    for window_start in tqdm(window_starts):
         window_end = window_start + ws
         window_edges = edges[(edges['bin1_id'] >= window_start) & (edges['bin2_id'] < window_end)]
         neighbor_edges = pd.DataFrame({'bin1_id':list(range(window_start, min(chrom_size-1, window_end - 1))), 'bin2_id': list(range(window_start+1, min(chrom_size, window_end)))})
@@ -125,8 +130,10 @@ def rwr(edges, chrom_len, resolution, window_size, step_size, distance_threshold
         window_edges.loc[:,'count'] = 1
         g = get_stochastic_matrix_from_edgelist(window_edges)
         window_edges_imp = solve_rwr_iterative(g, rp)
+        #if partial:
         window_edges_imp = window_edges_imp[(window_edges_imp['i'] + window_edges_imp['j'] > ss) & (window_edges_imp['i'] + window_edges_imp['j'] < ws + ss)]
-        window_edges_imp = window_edges_imp[(window_edges_imp['j'] - window_edges_imp['i'] <= distance_threshold)]
+        if keep_short_range:
+            window_edges_imp = window_edges_imp[(window_edges_imp['j'] - window_edges_imp['i'] <= distance_threshold)]
         window_edges_imp['i'] += window_start
         window_edges_imp['j'] += window_start
         window_edges_imp.columns = ['bin1_id', 'bin2_id', 'count']
@@ -221,11 +228,14 @@ def create_parser():
     parser.add_argument('-r', '--resolution', action = 'store', required = True, type = int, help = "resolution of contact maps")
     parser.add_argument('-l', '--chrom-lens', action = 'store', required = True, help = 'path to the chromosome lengths file')
     parser.add_argument('--format', action = 'store', required = True, help = 'format of input files: cooler or tab-sep')
+    parser.add_argument('--partial', action = 'store_true', default = False, help = 'partial RWR')
     parser.add_argument('--window-size', action = 'store', default = 10000000, type = int, help = 'window size for window-slicing rwr')
     parser.add_argument('--rp', action = 'store', default = 0.05, type = float, help = 'restart probability')
     parser.add_argument('--chrom-columns', action = 'store', required = False, nargs = 2, type = int, help = 'two integer column numbers for chromosomes')
     parser.add_argument('--pos-columns', action = 'store', required = False, nargs = 2, type = int, help = 'two integer column numbers for positions')
     parser.add_argument('--extension', action = 'store', required = True, help = 'extension of input files like .cool and .txt.gz')
+    parser.add_argument('--keep-short-range', action = 'store_true', default = False, \
+                        help = 'if set, only saves short range interactions within upper distance', required = False)
     parser.add_argument('--upper-distance', action = 'store', default = 2000000, type = int, help = 'maximum distance between bin pairs to store')
 
     return parser
