@@ -17,16 +17,16 @@ pairs_list = [GM12878_HFF_pairs, GM12878_pairs, HFF_pairs]
 plt.figure(figsize=(15, 5))  
 
 for j, p in enumerate(pairs_list):
-    # plt.subplot(131+j)
+    plt.subplot(131+j)
+    plt.xticks([1,2,3,4], ["Raw","scVI","Higashi K0","Higashi K5"])
     for i, d in enumerate(dirs):
         temp_df  = pd.read_csv(os.path.join(d,p), sep='\t')
         # temp_df.columns = ["cool1", "cool2", "HiCRep_SCC"]
-        subplot_index = len(dirs) * j + i + 1
+        #subplot_index = len(dirs) * j + i + 1
         # Create subplot with four columns
-        plt.subplot(len(pairs_list), len(dirs), subplot_index)
+        #plt.subplot(len(pairs_list), len(dirs), subplot_index)
         temp_df["HiCRep_SCC"] = pd.to_numeric(temp_df["HiCRep_SCC"], errors='coerce')
         plt.violinplot(temp_df["HiCRep_SCC"], showmeans=True, showmedians=True)
-        plt.xticks([1], [d])  # Only one violin plot, so only one x-tick
         plt.xlabel('Groups')
         plt.ylabel('Values')
 	# plt.legend()
