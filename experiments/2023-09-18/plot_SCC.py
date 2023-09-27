@@ -16,6 +16,7 @@ pairs_list = [GM12878_HFF_pairs, GM12878_pairs, HFF_pairs]
 
 plt.figure(figsize=(15, 5))  
 
+violins = []
 for j, p in enumerate(pairs_list):
     plt.subplot(131+j)
     plt.xticks([1,2,3,4], ["Raw","scVI","Higashi K0","Higashi K5"])
@@ -26,13 +27,14 @@ for j, p in enumerate(pairs_list):
         # Create subplot with four columns
         #plt.subplot(len(pairs_list), len(dirs), subplot_index)
         temp_df["HiCRep_SCC"] = pd.to_numeric(temp_df["HiCRep_SCC"], errors='coerce')
-        plt.violinplot(temp_df["HiCRep_SCC"], showmeans=True, showmedians=True)
+        v = plt.violinplot(temp_df["HiCRep_SCC"], showmeans=True, showmedians=True)
+        violins.append(v)
         plt.xlabel('Groups')
         plt.ylabel('Similarity Scores (SCC)')
 	# plt.legend()
         plt.title(p.replace(".txt", ""))
         plt.grid(axis='y')
-    plt.legend()
+    plt.legend(violins,  ["Raw","scVI","Higashi K0","Higashi K5"])
     plt.tight_layout()
 plt.savefig(os.path.join("/project/compbio-lab/scHi-C/Kim2020/similarity_scores/SCC_plot.png"))
 plt.savefig(os.path.join("/home/maa160/SnapHiC-D/experiments/2023-09-18/SCC_plot.png"))
