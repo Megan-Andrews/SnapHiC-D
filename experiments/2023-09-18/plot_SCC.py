@@ -32,6 +32,7 @@ for j, p in enumerate(pairs_list):
 	# plt.legend()
         plt.title(p.replace(".txt", ""))
         plt.grid(axis='y')
+    plt.legend()
     plt.tight_layout()
 plt.savefig(os.path.join("/project/compbio-lab/scHi-C/Kim2020/similarity_scores/SCC_plot.png"))
 plt.savefig(os.path.join("/home/maa160/SnapHiC-D/experiments/2023-09-18/SCC_plot.png"))
