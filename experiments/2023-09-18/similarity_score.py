@@ -1,5 +1,4 @@
 
-# evaluatig the QC score or reproducibility of the coolers? which method? all?
 
 import hicrep
 import cooler 
@@ -7,6 +6,7 @@ from hicrep.utils import readMcool
 from hicrep import hicrepSCC
 import os 
 import pandas as pd 
+import numpy as np
 
 cell1 = 'GM12878' 
 cell2 = 'HFF' #from Kim2020
@@ -32,39 +32,42 @@ higashi_k0_cools_out = os.path.join(out_dir, "higashi_k0_cools")
 higashi_k5_cools_out = os.path.join(out_dir, "higashi_k5_cools")
 
 conditions = [(Kim2020_cools, Kim2020_cools_out), (rwr_cools, rwr_cools_out), (scVI_cools, scVI_cools_out), (higashi_k0_cools, higashi_k0_cools_out), (higashi_k5_cools, higashi_k5_cools_out)]
+conditions = [(Kim2020_cools, Kim2020_cools_out),(scVI_cools, scVI_cools_out), (higashi_k0_cools, higashi_k0_cools_out), (higashi_k5_cools, higashi_k5_cools_out)]
 
-
-for in_dir, out_dir in conditions:
+for in_dir, o_dir in conditions:
     for file in pairs_list:
+        print(in_dir, file)
         df = pd.read_csv(file, sep='\t', header=None, names=["cool1", "cool2"])
 
         def calc_similarity(row):
             if in_dir != rwr_cools:
                 cool1 = os.path.join(in_dir, row['cool1'])
                 cool2 = os.path.join(in_dir, row['cool2'])
-                cool1, binSize1 = readMcool(cool1, -1)
-                cool2, binSize2 = readMcool(cool2, -1)
-                binSize = binSize1
-                 # smoothing window half-size
-                h = 1
-                # maximal genomic distance to include in the calculation
-                dBPMax = -1
-                # whether to perform down-sampling or not 
-                # if set True, it will bootstrap the data set # with larger contact counts to
-                # the same number of contacts as in the other data set; otherwise, the contact 
-                # matrices will be normalized by the respective total number of contacts
-                bDownSample = False
-                 # compute the SCC score
-                # this will result in a SCC score for each chromosome available in the data set
-                # listed in the same order as the chromosomes are listed in the input Cooler files
-                scc = hicrepSCC(cool1, cool2, h, dBPMax, bDownSample, np.array(['chr22',], dtype=str))
-                result1 = scc[0]
-                result2 = scc[1]
-            return result1, result2
-        
-        df['Cell1_Result'], df['Cell2_Result'] = zip(*df.apply(calc_similarity, axis=1))
+            else:
+                cool1 = os.path.join(in_dir, row['cool1'].replace(".cool", "_rwr.cool"))
+                cool2 = os.path.join(in_dir, row['cool2'].replace(".cool", "_rwr.cool"))
 
-        df.to_csv(os.path.join(out_dir, os.path.basename(file)), sep='\t', index=False)
+            cool1, binSize1 = readMcool(cool1, -1)
+            cool2, binSize2 = readMcool(cool2, -1)
+            binSize = binSize1
+            # smoothing window half-size
+            h = 1
+            # maximal genomic distance to include in the calculation
+            dBPMax = -1
+            # whether to perform down-sampling or not 
+            # if set True, it will bootstrap the data set # with larger contact counts to
+            # the same number of contacts as in the other data set; otherwise, the contact 
+            # matrices will be normalized by the respective total number of contacts
+            bDownSample = False
+            # compute the SCC score
+            # this will result in a SCC score for each chromosome available in the data set
+            # listed in the same order as the chromosomes are listed in the input Cooler files
+            scc = hicrepSCC(cool1, cool2, h, dBPMax, bDownSample, np.array(['chr22',], dtype=str))
+            return scc[0]
+        
+        df['HiCRep_SCC'] = df.apply(calc_similarity, axis=1)
+        print(os.path.join(o_dir, os.path.basename(file)))
+        df.to_csv(os.path.join(o_dir, os.path.basename(file)), sep='\t', index=False)
 
 
 
