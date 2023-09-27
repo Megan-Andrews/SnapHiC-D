@@ -28,7 +28,7 @@ for j, p in enumerate(pairs_list):
         temp_df["HiCRep_SCC"] = pd.to_numeric(temp_df["HiCRep_SCC"], errors='coerce')
         plt.violinplot(temp_df["HiCRep_SCC"], showmeans=True, showmedians=True)
         plt.xlabel('Groups')
-        plt.ylabel('Values')
+        plt.ylabel('Similarity Scores (SCC)')
 	# plt.legend()
         plt.title(p.replace(".txt", ""))
         plt.grid(axis='y')
