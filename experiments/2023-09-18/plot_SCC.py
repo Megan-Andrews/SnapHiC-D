@@ -28,7 +28,7 @@ for j, p in enumerate(pairs_list):
         #plt.subplot(len(pairs_list), len(dirs), subplot_index)
         temp_df["HiCRep_SCC"] = pd.to_numeric(temp_df["HiCRep_SCC"], errors='coerce')
         v = plt.violinplot(temp_df["HiCRep_SCC"], showmeans=True, showmedians=True)
-        violins.append(v)
+        violins.append(v['bodies'][0])
         plt.xlabel('Groups')
         plt.ylabel('Similarity Scores (SCC)')
 	# plt.legend()
