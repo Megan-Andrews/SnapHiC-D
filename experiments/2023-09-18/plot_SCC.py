@@ -17,7 +17,7 @@ pairs_list = [GM12878_HFF_pairs, GM12878_pairs, HFF_pairs]
 #plt.figure(figsize=(15, 5))  
 
 violins = []
-fig, axes = plt.subplots(1, 1, figsize=(15, 5))
+fig, axes = plt.subplots(1, 1, figsize=(10, 5))
 
 # Set the common x-axis ticks and labels
 x_ticks = [1, 2, 3]
@@ -33,9 +33,14 @@ for j, p in enumerate(pairs_list):
 
     pos = [j+1] * 5
     v = ax.violinplot(all_violin_data, positions=pos, showmeans=True, showmedians=True)                
+        # Set colors for the violin bodies
     for violin, color in zip(v['bodies'], colors):
         violin.set_facecolor(color)
-        violin.set_edgecolor(color)
+    
+    # Set colors for the mean line and median line
+    for partname, color in zip(('cbars', 'cmedians'), colors):
+        part = v[partname]
+        part.set_edgecolor(color)
     violins.append(v['bodies'][0])
     violins.append(v['bodies'][1])
     violins.append(v['bodies'][2])
