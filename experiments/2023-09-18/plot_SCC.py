@@ -38,9 +38,9 @@ for j, p in enumerate(pairs_list):
         violin.set_facecolor(color)
     
     # Set colors for the mean line and median line
-    for partname, color in zip(('cbars', 'cmedians'), colors):
-        part = v[partname]
-        part.set_edgecolor(color)
+#    for partname, color in zip(('cbars', 'cmedians'), colors):
+#        part = v[partname]
+#        part.set_edgecolor(color)
     violins.append(v['bodies'][0])
     violins.append(v['bodies'][1])
     violins.append(v['bodies'][2])
