@@ -20,8 +20,8 @@ violins = []
 fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
 # Set the common x-axis ticks and labels
-x_ticks = [1, 2, 3, 4, 5]
-x_tick_labels = ["Raw", "RWR", "scVI", "Higashi K0", "Higashi K5"]
+x_ticks = [1, 2, 3]
+x_tick_labels = ["GM12878-HFF", "GM12878-GM12878", "HFF-HFF"]
 
 for j, p in enumerate(pairs_list):
     ax = axes[j]  # Get the current axis
@@ -40,7 +40,7 @@ for j, p in enumerate(pairs_list):
         ax.grid(axis='y')
 
 # Add a legend to the first subplot (you can customize this as needed)
-axes[0].legend(violins, ["Raw", "RWR", "scVI", "Higashi K0", "Higashi K5"])
+axes[0].legend(violins, ["Raw", "RWR", "scVI", "Higashi K0", "Higashi K5"], loc='upper left', bbox_to_anchor=(1, 1))
 
 plt.tight_layout()
 plt.savefig(os.path.join("/project/compbio-lab/scHi-C/Kim2020/similarity_scores/SCC_plot_2.png"))
