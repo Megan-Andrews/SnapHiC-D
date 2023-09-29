@@ -17,7 +17,7 @@ pairs_list = [GM12878_HFF_pairs, GM12878_pairs, HFF_pairs]
 #plt.figure(figsize=(15, 5))  
 
 violins = []
-fig, axes = plt.subplots(1, 1, figsize=(10, 5))
+fig, axes = plt.subplots(1, 1, figsize=(8, 5))
 
 # Set the common x-axis ticks and labels
 x_ticks = [1, 2, 3]
@@ -32,7 +32,7 @@ for j, p in enumerate(pairs_list):
         all_violin_data.append(temp_df["HiCRep_SCC"])
 
     pos = [j+1] * 5
-    v = ax.violinplot(all_violin_data, positions=pos, showmeans=True, showmedians=True)                
+    v = ax.violinplot(all_violin_data, positions=pos, showmeans=False, showmedians=False)                
         # Set colors for the violin bodies
     for violin, color in zip(v['bodies'], colors):
         violin.set_facecolor(color)
