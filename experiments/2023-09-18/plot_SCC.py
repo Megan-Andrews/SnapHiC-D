@@ -25,19 +25,23 @@ x_tick_labels = ["GM12878-HFF", "GM12878-GM12878", "HFF-HFF"]
 
 for j, p in enumerate(pairs_list):
     ax = axes  # Get the current axis
-    
+    all_violin_data = []
     for i, d in enumerate(dirs):
         temp_df = pd.read_csv(os.path.join(d, p), sep='\t')
         temp_df["HiCRep_SCC"] = pd.to_numeric(temp_df["HiCRep_SCC"])
-        
-        v = ax.violinplot(temp_df["HiCRep_SCC"], showmeans=True, showmedians=True)
-        violins.append(v['bodies'][0])
-        ax.set_xticks(x_ticks)
-        ax.set_xticklabels(x_tick_labels)
-        ax.set_xlabel('Groups')
-        ax.set_ylabel('Similarity Scores (SCC)')
-        ax.set_title(p.replace(".txt", ""))
-        ax.grid(axis='y')
+        all_violin_data.append(temp_df["HiCRep_SCC"])
+
+    x_offset = x_ticks[j]
+    x = [pos + x_offset for pos in x_ticks]
+    print(len(all_violin_data),len(x),x)
+    pos = [j] * 5
+    v = ax.violinplot(all_violin_data, positions=pos, showmeans=True, showmedians=True)                
+    ax.set_xticks(x_ticks)
+    ax.set_xticklabels(x_tick_labels)
+    ax.set_xlabel('Groups')
+    ax.set_ylabel('Similarity Scores (SCC)')
+    ax.set_title("SCC")
+    ax.grid(axis='y')
 
 # Add a legend to the first subplot (you can customize this as needed)
 axes.legend(violins, ["Raw", "RWR", "scVI", "Higashi K0", "Higashi K5"], loc='upper left', bbox_to_anchor=(1, 1))
