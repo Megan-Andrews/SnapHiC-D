@@ -22,7 +22,7 @@ fig, axes = plt.subplots(1, 1, figsize=(15, 5))
 # Set the common x-axis ticks and labels
 x_ticks = [1, 2, 3]
 x_tick_labels = ["GM12878-HFF", "GM12878-GM12878", "HFF-HFF"]
-
+colors = ['blue', 'green', 'red', 'purple', 'orange']
 for j, p in enumerate(pairs_list):
     ax = axes  # Get the current axis
     all_violin_data = []
@@ -31,11 +31,10 @@ for j, p in enumerate(pairs_list):
         temp_df["HiCRep_SCC"] = pd.to_numeric(temp_df["HiCRep_SCC"])
         all_violin_data.append(temp_df["HiCRep_SCC"])
 
-    x_offset = x_ticks[j]
-    x = [pos + x_offset for pos in x_ticks]
-    print(len(all_violin_data),len(x),x)
-    pos = [j] * 5
+    pos = [j+1] * 5
     v = ax.violinplot(all_violin_data, positions=pos, showmeans=True, showmedians=True)                
+    for violin, color in zip(v['bodies'], colors):
+        violin.set_facecolor(color)
     ax.set_xticks(x_ticks)
     ax.set_xticklabels(x_tick_labels)
     ax.set_xlabel('Groups')
