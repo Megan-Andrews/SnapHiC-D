@@ -32,7 +32,7 @@ higashi_k0_cools_out = os.path.join(out_dir, "higashi_k0_cools")
 higashi_k5_cools_out = os.path.join(out_dir, "higashi_k5_cools")
 
 conditions = [(Kim2020_cools, Kim2020_cools_out), (rwr_cools, rwr_cools_out), (scVI_cools, scVI_cools_out), (higashi_k0_cools, higashi_k0_cools_out), (higashi_k5_cools, higashi_k5_cools_out)]
-conditions = [(Kim2020_cools, Kim2020_cools_out),(scVI_cools, scVI_cools_out), (higashi_k0_cools, higashi_k0_cools_out), (higashi_k5_cools, higashi_k5_cools_out)]
+#conditions = [(Kim2020_cools, Kim2020_cools_out),(scVI_cools, scVI_cools_out), (higashi_k0_cools, higashi_k0_cools_out), (higashi_k5_cools, higashi_k5_cools_out)]
 
 for in_dir, o_dir in conditions:
     for file in pairs_list:

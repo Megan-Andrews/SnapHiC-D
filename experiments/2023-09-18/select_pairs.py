@@ -20,8 +20,8 @@ def write_file_pairs(pairs, output_file):
             file.write(f"{pair[0]}\t{pair[1]}\n")
 
 # Input file paths
-input_file1 = 'HFF_files.txt'  # Replace with your first input file path
-input_file2 = 'GM12878_files.txt'  # Replace with your second input file path
+input_file1 = 'HFF_files_2.txt'  # Replace with your first input file path
+input_file2 = 'GM12878_files_2.txt'  # Replace with your second input file path
 
 
 
