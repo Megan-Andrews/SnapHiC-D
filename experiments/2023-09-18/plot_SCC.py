@@ -33,14 +33,14 @@ for j, p in enumerate(pairs_list):
 
     pos = [j+1] * 5
     v = ax.violinplot(all_violin_data, positions=pos, showmeans=True, showmedians=True)                
+    for violin, color in zip(v['bodies'], colors):
+        violin.set_facecolor(color)
+        violin.set_edgecolor(color)
     violins.append(v['bodies'][0])
     violins.append(v['bodies'][1])
     violins.append(v['bodies'][2])
     violins.append(v['bodies'][3])
     violins.append(v['bodies'][4])
-    for violin, color in zip(v['bodies'], colors):
-        violin.set_color(color)
-        violin.set_edgecolor(color)
     ax.set_xticks(x_ticks)
     ax.set_xticklabels(x_tick_labels)
     ax.set_xlabel('Groups')
