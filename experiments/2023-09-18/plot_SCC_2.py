@@ -64,7 +64,7 @@ plt.clf()
 ## Other plot
 
 violins = []
-fig, axes = plt.subplots(1, 5, figsize=(15, 5))
+fig, axes = plt.subplots(1, 5, figsize=(8, 5))
 
 # Set the common x-axis ticks and labels
 x_ticks = [1, 2, 3]
@@ -98,15 +98,18 @@ for i, d in enumerate(dirs):
     ax.set_xticklabels(x_tick_labels)
     ax.set_xlabel('Groups')
     ax.set_ylabel('')
-    ax.set_yticks([])
-    ax.set_title(os.path.basename(d).replace("_cools"," "))
     ax.grid(axis='y')
-
+    if i != 0:
+        ax.set_yticklabels([])
 axes[0].set_ylabel('Similarity Scores (SCC)')
-
+axes[0].set_title("Raw")
+axes[1].set_title("RWR")
+axes[2].set_title("scVI")
+axes[3].set_title("Higashi K0")
+axes[4].set_title("Higashi K5")
 # Add a legend to the first subplot (you can customize this as needed)
 #axes.legend(violins, ["Raw", "RWR", "scVI", "Higashi K0", "Higashi K5"], loc='upper left', bbox_to_anchor=(1, 1))
-plt.subplots_adjust(wspace=0)
+plt.subplots_adjust(wspace=-0.25)
 plt.tight_layout()
 plt.savefig(os.path.join("/project/compbio-lab/scHi-C/Kim2020/similarity_scores/SCC_plot_h0_subplots.png"))
 plt.savefig(os.path.join("/home/maa160/SnapHiC-D/experiments/2023-09-18/SCC_plot_h0_subplots.png"))
