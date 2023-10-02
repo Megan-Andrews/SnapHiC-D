@@ -93,6 +93,7 @@ for i, d in enumerate(dirs):
 #    violins.append(v['bodies'][2])
 #    violins.append(v['bodies'][3])
 #    violins.append(v['bodies'][4])
+    ax.set_ylim(-1, 1)  # Set y-axis limits to [-1, 3]
     ax.set_xticks(x_ticks)
     ax.set_xticklabels(x_tick_labels)
     ax.set_xlabel('Groups')
