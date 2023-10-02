@@ -77,9 +77,9 @@ for i, d in enumerate(dirs):
         temp_df = pd.read_csv(os.path.join(d, p), sep='\t')
         temp_df["HiCRep_SCC"] = pd.to_numeric(temp_df["HiCRep_SCC"])
         all_violin_data.append(temp_df["HiCRep_SCC"])
-    print(len(all_violin_data))
+#    print(len(all_violin_data))
     # pos = [j+1] * 5
-    v = ax.violinplot(all_violin_data, positions=[1,2,3], showmeans=False, showmedians=False)                
+    v = ax.violinplot(all_violin_data, positions=[1,2,3], showmeans=True, showmedians=False)                
         # Set colors for the violin bodies
 #    for violin, color in zip(v['bodies'], colors):
 #        violin.set_facecolor(color)
@@ -97,13 +97,16 @@ for i, d in enumerate(dirs):
     ax.set_xticks(x_ticks)
     ax.set_xticklabels(x_tick_labels)
     ax.set_xlabel('Groups')
-    ax.set_ylabel('Similarity Scores (SCC)')
-    ax.set_title(os.path.basename(d))
+    ax.set_ylabel('')
+    ax.set_yticks([])
+    ax.set_title(os.path.basename(d).replace("_cools"," "))
     ax.grid(axis='y')
+
+axes[0].set_ylabel('Similarity Scores (SCC)')
 
 # Add a legend to the first subplot (you can customize this as needed)
 #axes.legend(violins, ["Raw", "RWR", "scVI", "Higashi K0", "Higashi K5"], loc='upper left', bbox_to_anchor=(1, 1))
-
+plt.subplots_adjust(wspace=0)
 plt.tight_layout()
 plt.savefig(os.path.join("/project/compbio-lab/scHi-C/Kim2020/similarity_scores/SCC_plot_h0_subplots.png"))
 plt.savefig(os.path.join("/home/maa160/SnapHiC-D/experiments/2023-09-18/SCC_plot_h0_subplots.png"))
