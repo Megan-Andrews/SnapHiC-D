@@ -51,7 +51,7 @@ for in_dir, o_dir in conditions:
             cool2, binSize2 = readMcool(cool2, -1)
             binSize = binSize1
             # smoothing window half-size
-            h = 1
+            h = 0
             # maximal genomic distance to include in the calculation
             dBPMax = -1
             # whether to perform down-sampling or not 
@@ -67,7 +67,7 @@ for in_dir, o_dir in conditions:
         
         df['HiCRep_SCC'] = df.apply(calc_similarity, axis=1)
         print(os.path.join(o_dir, os.path.basename(file)))
-        df.to_csv(os.path.join(o_dir, os.path.basename(file)), sep='\t', index=False)
+        df.to_csv(os.path.join(o_dir,f"h0_{os.path.basename(file)}"), sep='\t', index=False)
 
 
 
