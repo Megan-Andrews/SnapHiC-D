@@ -68,17 +68,18 @@ fig, axes = plt.subplots(1, 5, figsize=(15, 5))
 
 # Set the common x-axis ticks and labels
 x_ticks = [1, 2, 3]
-x_tick_labels = ["GM12878-HFF", "GM12878-GM12878", "HFF-HFF"]
+x_tick_labels = ["Both", "GM12878", "HFF"]
 colors = ['blue', 'green', 'red', 'cyan', 'orange']
 for i, d in enumerate(dirs):
     ax = axes[i]  # Get the current axis
+    all_violin_data = []
     for j, p in enumerate(pairs_list):
-        all_violin_data = []
         temp_df = pd.read_csv(os.path.join(d, p), sep='\t')
         temp_df["HiCRep_SCC"] = pd.to_numeric(temp_df["HiCRep_SCC"])
         all_violin_data.append(temp_df["HiCRep_SCC"])
+    print(len(all_violin_data))
     # pos = [j+1] * 5
-    v = ax.violinplot(all_violin_data, showmeans=False, showmedians=False)                
+    v = ax.violinplot(all_violin_data, positions=[1,2,3], showmeans=False, showmedians=False)                
         # Set colors for the violin bodies
 #    for violin, color in zip(v['bodies'], colors):
 #        violin.set_facecolor(color)
@@ -96,7 +97,7 @@ for i, d in enumerate(dirs):
     ax.set_xticklabels(x_tick_labels)
     ax.set_xlabel('Groups')
     ax.set_ylabel('Similarity Scores (SCC)')
-    ax.set_title("SCC")
+    ax.set_title(os.path.basename(d))
     ax.grid(axis='y')
 
 # Add a legend to the first subplot (you can customize this as needed)
