@@ -7,7 +7,7 @@ rwr_cools = "/project/compbio-lab/scHi-C/Kim2020/similarity_scores/rwr_cools"
 scVI_cools = "/project/compbio-lab/scHi-C/Kim2020/similarity_scores/scVI_cools"
 higashi_k0_cools = "/project/compbio-lab/scHi-C/Kim2020/similarity_scores/higashi_k0_cools"
 higashi_k5_cools =  "/project/compbio-lab/scHi-C/Kim2020/similarity_scores/higashi_k5_cools"
-dirs = [Kim2020_cools, rwr_cools, scVI_cools, higashi_k0_cools, higashi_k5_cools]
+dirs = [Kim2020_cools, rwr_cools, higashi_k0_cools, higashi_k5_cools,scVI_cools]
 
 GM12878_HFF_pairs = "h0_GM12878_HFF_selected_pairs.txt"
 GM12878_pairs = "h0_GM12878_selected_pairs.txt"
@@ -68,7 +68,7 @@ fig, axes = plt.subplots(1, 5, figsize=(8, 5))
 colors = sns.color_palette('husl', n_colors=5)
 print(colors)
 # Set the common x-axis ticks and labels
-x_ticks = [1, 2, 3]
+x_ticks = [0, 1, 2]
 x_tick_labels = ["Both", "GM12878", "HFF"]
 for i, d in enumerate(dirs):
     ax = axes[i]  # Get the current axis
