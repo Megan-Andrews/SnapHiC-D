@@ -83,6 +83,7 @@ for i, d in enumerate(dirs):
     ax.set_ylim(-1, 1)  # Set y-axis limits to [-1, 3]
     ax.set_xticks(x_ticks)
     ax.set_xticklabels(x_tick_labels, rotation=25)
+    ax.set_ylabel('')
     ax.set_title(imp_type_labels[i])
     ax.grid(axis='y')
     if i != 0:
