@@ -67,14 +67,14 @@ plt.clf()
 violins = []
 fig, axes = plt.subplots(1, 5, figsize=(8.5, 5))
 colors = sns.color_palette('husl', n_colors=5)
-print(colors)
+#print(colors)
 # Set the common x-axis ticks and labels
 x_ticks = [0, 1, 2]
 x_tick_labels = ["Both", "GM12878", "HFF"]
 for i, d in enumerate(dirs):
     ax = axes[i]  # Get the current axis
     temp_df = pd.read_csv(os.path.join(d, "h0_all_pairs.csv"), sep=',')
-    print(temp_df)
+    #print(temp_df)
     temp_df["HFF_SCC"] = pd.to_numeric(temp_df["HFF_SCC"])
     temp_df["GM12878_SCC"] = pd.to_numeric(temp_df["GM12878_SCC"])
     temp_df["GM12878_HFF_SCC"] = pd.to_numeric(temp_df["GM12878_HFF_SCC"])
@@ -91,8 +91,8 @@ for i, d in enumerate(dirs):
 axes[0].set_ylabel('Similarity Scores (SCC)')
 plt.subplots_adjust(wspace=0)
 plt.tight_layout()
-plt.savefig(os.path.join("/project/compbio-lab/scHi-C/Kim2020/similarity_scores/SCC_plot_h0_subplots.png"))
-plt.savefig(os.path.join("/home/maa160/SnapHiC-D/experiments/2023-09-18/SCC_plot_h0_subplots.png"))
+plt.savefig("/project/compbio-lab/scHi-C/Kim2020/similarity_scores/SCC_plot_h0_subplots.png")
+plt.savefig("/home/maa160/SnapHiC-D/experiments/2023-09-18/SCC_plot_h0_subplots.png")
 
 
 
