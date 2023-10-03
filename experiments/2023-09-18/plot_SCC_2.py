@@ -82,7 +82,7 @@ for i, d in enumerate(dirs):
     sns.violinplot(all_violin_data,ax=ax, palette=[colors[i]]*3)                
     ax.set_ylim(-1, 1)  # Set y-axis limits to [-1, 3]
     ax.set_xticks(x_ticks)
-    ax.set_xticklabels(x_tick_labels, rotation=45,fontsize=8)
+    ax.set_xticklabels(x_tick_labels, rotation=45,fontsize=6)
     ax.set_ylabel('')
     ax.set_title(imp_type_labels[i])
     ax.grid(axis='y')
