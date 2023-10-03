@@ -15,7 +15,7 @@ HFF_pairs =  "h0_HFF_selected_pairs.txt"
 pairs_list = [GM12878_HFF_pairs, GM12878_pairs, HFF_pairs]
 
 #plt.figure(figsize=(15, 5))  
-
+"""
 violins = []
 fig, axes = plt.subplots(1, 1, figsize=(8, 5))
 
@@ -60,39 +60,25 @@ plt.tight_layout()
 plt.savefig(os.path.join("/project/compbio-lab/scHi-C/Kim2020/similarity_scores/SCC_plot_h0.png"))
 plt.savefig(os.path.join("/home/maa160/SnapHiC-D/experiments/2023-09-18/SCC_plot_h0.png"))
 plt.clf()
-
+"""
 ## Other plot
 
 violins = []
 fig, axes = plt.subplots(1, 5, figsize=(8, 5))
 colors = sns.color_palette('husl', n_colors=5)
+print(colors)
 # Set the common x-axis ticks and labels
 x_ticks = [1, 2, 3]
 x_tick_labels = ["Both", "GM12878", "HFF"]
-colors = ['blue', 'green', 'red', 'cyan', 'orange']
 for i, d in enumerate(dirs):
     ax = axes[i]  # Get the current axis
-    all_violin_data = []
-    for j, p in enumerate(pairs_list):
-        temp_df = pd.read_csv(os.path.join(d, p), sep='\t')
-        temp_df["HiCRep_SCC"] = pd.to_numeric(temp_df["HiCRep_SCC"])
-        all_violin_data.append(temp_df["HiCRep_SCC"])
-#    print(len(all_violin_data))
-    # pos = [j+1] * 5
+    temp_df = pd.read_csv(os.path.join(d, "h0_all_pairs.csv"), sep=',')
+    print(temp_df)
+    temp_df["HFF_SCC"] = pd.to_numeric(temp_df["HFF_SCC"])
+    temp_df["GM12878_SCC"] = pd.to_numeric(temp_df["GM12878_SCC"])
+    temp_df["GM12878_HFF_SCC"] = pd.to_numeric(temp_df["GM12878_HFF_SCC"])
+    all_violin_data = temp_df[["GM12878_HFF_SCC", "GM12878_SCC", "HFF_SCC"]]
     sns.violinplot(all_violin_data,ax=ax, palette=[colors[i]]*3)                
-        # Set colors for the violin bodies
-#    for violin, color in zip(v['bodies'], colors):
-#        violin.set_facecolor(color)
-    
-    # Set colors for the mean line and median line
-#    for partname, color in zip(('cbars', 'cmedians'), colors):
-#        part = v[partname]
-#        part.set_edgecolor(color)
-#    violins.append(v['bodies'][0])
-#    violins.append(v['bodies'][1])
-#    violins.append(v['bodies'][2])
-#    violins.append(v['bodies'][3])
-#    violins.append(v['bodies'][4])
     ax.set_ylim(-1, 1)  # Set y-axis limits to [-1, 3]
     ax.set_xticks(x_ticks)
     ax.set_xticklabels(x_tick_labels)
@@ -102,13 +88,6 @@ for i, d in enumerate(dirs):
     if i != 0:
         ax.set_yticklabels([])
 axes[0].set_ylabel('Similarity Scores (SCC)')
-#axes[0].set_title("Raw")
-#axes[1].set_title("RWR")
-#axes[2].set_title("scVI")
-#axes[3].set_title("Higashi K0")
-#axes[4].set_title("Higashi K5")
-# Add a legend to the first subplot (you can customize this as needed)
-#axes.legend(violins, ["Raw", "RWR", "scVI", "Higashi K0", "Higashi K5"], loc='upper left', bbox_to_anchor=(1, 1))
 plt.subplots_adjust(wspace=0)
 plt.tight_layout()
 plt.savefig(os.path.join("/project/compbio-lab/scHi-C/Kim2020/similarity_scores/SCC_plot_h0_subplots.png"))
