@@ -8,6 +8,7 @@ scVI_cools = "/project/compbio-lab/scHi-C/Kim2020/similarity_scores/scVI_cools"
 higashi_k0_cools = "/project/compbio-lab/scHi-C/Kim2020/similarity_scores/higashi_k0_cools"
 higashi_k5_cools =  "/project/compbio-lab/scHi-C/Kim2020/similarity_scores/higashi_k5_cools"
 dirs = [Kim2020_cools, rwr_cools, higashi_k0_cools, higashi_k5_cools,scVI_cools]
+imp_type_labels = ['Raw', 'RWR', 'Higashi (0 nbr)', 'Higashi (5 nbr)', 'scVI-3D']
 
 GM12878_HFF_pairs = "h0_GM12878_HFF_selected_pairs.txt"
 GM12878_pairs = "h0_GM12878_selected_pairs.txt"
@@ -81,9 +82,8 @@ for i, d in enumerate(dirs):
     sns.violinplot(all_violin_data,ax=ax, palette=[colors[i]]*3)                
     ax.set_ylim(-1, 1)  # Set y-axis limits to [-1, 3]
     ax.set_xticks(x_ticks)
-    ax.set_xticklabels(x_tick_labels)
-    ax.set_xlabel('Groups')
-    ax.set_ylabel('')
+    ax.set_xticklabels(x_tick_labels, rotation=-45)
+    ax.set_ylabel(imp_type_labels[i])
     ax.grid(axis='y')
     if i != 0:
         ax.set_yticklabels([])
