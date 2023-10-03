@@ -70,7 +70,7 @@ colors = sns.color_palette('husl', n_colors=5)
 #print(colors)
 # Set the common x-axis ticks and labels
 x_ticks = [0, 1, 2]
-x_tick_labels = ["GM12878 vs HFF", "GM12878 vs GM12878", "HFF vs HFF"]
+x_tick_labels = ["GM12878\nvs\nHFF", "GM12878\nvs\nGM12878", "HFF\nvs\nHFF"]
 for i, d in enumerate(dirs):
     ax = axes[i]  # Get the current axis
     temp_df = pd.read_csv(os.path.join(d, "h0_all_pairs.csv"), sep=',')
