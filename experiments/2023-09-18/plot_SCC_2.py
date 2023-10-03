@@ -70,7 +70,7 @@ colors = sns.color_palette('husl', n_colors=5)
 #print(colors)
 # Set the common x-axis ticks and labels
 x_ticks = [0, 1, 2]
-x_tick_labels = ["GM12878\nvs\nHFF", "GM12878\nvs\nGM12878", "HFF\nvs\nHFF"]
+x_tick_labels = ["GM12878\nvs HFF", "GM12878\nvs GM12878", "HFF\nvs HFF"]
 for i, d in enumerate(dirs):
     ax = axes[i]  # Get the current axis
     temp_df = pd.read_csv(os.path.join(d, "h0_all_pairs.csv"), sep=',')
@@ -82,7 +82,7 @@ for i, d in enumerate(dirs):
     sns.violinplot(all_violin_data,ax=ax, palette=[colors[i]]*3)                
     ax.set_ylim(-1, 1)  # Set y-axis limits to [-1, 3]
     ax.set_xticks(x_ticks)
-    ax.set_xticklabels(x_tick_labels, rotation=45,fontsize=8)
+    ax.set_xticklabels(x_tick_labels, rotation=45,fontsize=7)
     ax.set_ylabel('')
     ax.set_title(imp_type_labels[i])
     ax.grid(axis='y')
