@@ -65,7 +65,7 @@ plt.clf()
 ## Other plot
 
 violins = []
-fig, axes = plt.subplots(1, 5, figsize=(8, 5))
+fig, axes = plt.subplots(1, 5, figsize=(8.5, 5))
 colors = sns.color_palette('husl', n_colors=5)
 print(colors)
 # Set the common x-axis ticks and labels
@@ -83,7 +83,8 @@ for i, d in enumerate(dirs):
     ax.set_ylim(-1, 1)  # Set y-axis limits to [-1, 3]
     ax.set_xticks(x_ticks)
     ax.set_xticklabels(x_tick_labels, rotation=-45)
-    ax.set_ylabel(imp_type_labels[i])
+    ax.set_ylabel([])
+    ax.set_title(imp_type_labels[i])
     ax.grid(axis='y')
     if i != 0:
         ax.set_yticklabels([])
