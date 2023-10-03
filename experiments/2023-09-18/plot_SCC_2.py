@@ -91,8 +91,8 @@ for i, d in enumerate(dirs):
 axes[0].set_ylabel('Similarity Scores (SCC)')
 plt.subplots_adjust(wspace=0)
 plt.tight_layout()
-plt.savefig("/project/compbio-lab/scHi-C/Kim2020/similarity_scores/SCC_plot_h0_subplots.png")
-plt.savefig("/home/maa160/SnapHiC-D/experiments/2023-09-18/SCC_plot_h0_subplots.png")
+plt.savefig("/project/compbio-lab/scHi-C/Kim2020/similarity_scores/SCC_plot_h0_subplots.png",dpi=300)
+plt.savefig("/home/maa160/SnapHiC-D/experiments/2023-09-18/SCC_plot_h0_subplots.png",dpi=300)
 
 
 
