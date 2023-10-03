@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
-
+import seaborn as sns
 Kim2020_cools = "/project/compbio-lab/scHi-C/Kim2020/similarity_scores/Kim2020_cools"
 rwr_cools = "/project/compbio-lab/scHi-C/Kim2020/similarity_scores/rwr_cools"
 scVI_cools = "/project/compbio-lab/scHi-C/Kim2020/similarity_scores/scVI_cools"
@@ -65,7 +65,7 @@ plt.clf()
 
 violins = []
 fig, axes = plt.subplots(1, 5, figsize=(8, 5))
-
+colors = sns.color_palette('husl', n_colors=5)
 # Set the common x-axis ticks and labels
 x_ticks = [1, 2, 3]
 x_tick_labels = ["Both", "GM12878", "HFF"]
@@ -79,7 +79,7 @@ for i, d in enumerate(dirs):
         all_violin_data.append(temp_df["HiCRep_SCC"])
 #    print(len(all_violin_data))
     # pos = [j+1] * 5
-    v = ax.violinplot(all_violin_data, positions=[1,2,3], showmeans=True, showmedians=False)                
+    sns.violinplot(all_violin_data,ax=ax, palette=[colors[i]]*3)                
         # Set colors for the violin bodies
 #    for violin, color in zip(v['bodies'], colors):
 #        violin.set_facecolor(color)
@@ -102,14 +102,14 @@ for i, d in enumerate(dirs):
     if i != 0:
         ax.set_yticklabels([])
 axes[0].set_ylabel('Similarity Scores (SCC)')
-axes[0].set_title("Raw")
-axes[1].set_title("RWR")
-axes[2].set_title("scVI")
-axes[3].set_title("Higashi K0")
-axes[4].set_title("Higashi K5")
+#axes[0].set_title("Raw")
+#axes[1].set_title("RWR")
+#axes[2].set_title("scVI")
+#axes[3].set_title("Higashi K0")
+#axes[4].set_title("Higashi K5")
 # Add a legend to the first subplot (you can customize this as needed)
 #axes.legend(violins, ["Raw", "RWR", "scVI", "Higashi K0", "Higashi K5"], loc='upper left', bbox_to_anchor=(1, 1))
-plt.subplots_adjust(wspace=-0.25)
+plt.subplots_adjust(wspace=0)
 plt.tight_layout()
 plt.savefig(os.path.join("/project/compbio-lab/scHi-C/Kim2020/similarity_scores/SCC_plot_h0_subplots.png"))
 plt.savefig(os.path.join("/home/maa160/SnapHiC-D/experiments/2023-09-18/SCC_plot_h0_subplots.png"))
